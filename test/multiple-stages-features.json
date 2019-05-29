@@ -1,0 +1,54 @@
+{
+    "stages": {
+        "all-except-important": [
+            {
+                "blacklist": [
+                    "^important$"
+                ]
+            }
+        ],
+        "poc": [
+            {
+                "whitelist": [
+                    "demo/.*demofeature.*"
+                ]
+            }
+        ],
+        "dev": [
+            {
+                "whitelist": [
+                    "Dev.*"
+                ]
+            }
+        ],
+        "test": [
+            {
+                "whitelist": [
+                    "demo/.*test.*/.*Official.*",
+                    "demo2/.*test2.*"
+                ]
+            }
+        ],
+        "prod": [
+            {
+                "whitelist": [
+                    "production/.*"
+                ]
+            }
+        ]
+    },
+    "features": {
+        "filetracker": {
+            "stages": ["poc","dev", "prod"],
+            "environmentVariables": [
+                { "Use_FileTracker": "1" }
+            ]
+        },
+        "newestfeature": {
+            "stages": ["all-except-important"]
+        },
+        "testfeature": {
+            "stages": ["test"]
+        }
+    }
+}

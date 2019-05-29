@@ -1,3 +1,230 @@
+# PowerShell Feature Flags
+
+This package contains a simple implementation of feature flags for PowerShell,
+which relies on a local configuration file to verify if a given feature should
+be enabled or not.
+
+The configuration file contains two sections:
+- **stages**: a section where roll-out stages are defined;
+- **features**: a section where each feature can be associated to a roll-out stage.
+
+A roll-out *stage* is defined by a name and an array of *conditions* that the
+predicate must match **in the order they are presented** for the feature associated to
+the given stage to be enabled.
+
+A feature can be assigned an array of stages that it applies to.  In addition, it can also accept an environment variable array, and can optionally output an environment configuration file.
+
+## Simple example
+
+```json
+{
+    "stages": {
+        "test-repo-and-branch": [
+            {
+                "whitelist": [
+                    "storage1/.*",
+                    "storage2/dev-branch"
+                ]
+            }
+        ]
+    },
+    "features": {
+        "experimental-feature": {
+          "stages": ["test-repo-and-branch"],
+          "environmentVariables": [
+            { "Use_ExperimentalFeature": "1" }
+          ]
+        }
+    }
+}
+```
+
+In this above example, `Test-FeatureFlag` would return true for the feature
+`experimental-feature` if the given predicate is either `storage2/dev-branch` or
+if it matches the regex `storage1/.*`.
+
+Stage names and feature names must be non-empty and must consist of non-space characters.
+
+The environment variable 'Use_ExperimentalFeature' will also be associated with the feature.  The module contains methods that can be used to output the enabled feature flags environment variables so they can be applied during execution.  *Note: this powershell only writes out the featureflags environment file, but does
+not attempt to set the environment variables.
+
+## Life of a feature flag
+
+Feature flags are expected to be in use while a feature is rolled out to production,
+or in case there is a need to conditionally enable or disable features.
+
+An example lifecycle of a feature flag might be the following:
+
+1. A new feature is checked in production after testing, in a disabled state;
+2. The feature is enabled for a particular customer;
+3. The feature is enabled for a small set of customers;
+4. The feature is gradually rolled out to increasingly large percentages of customers
+   (e.g., 5%, 10%, 20%, 50%)
+5. The feature is rolled out to all customers (100%)
+6. The test for the feature flag is removed from the code, and the feature flag
+   configuration is removed as well.
+
+Here is how these example stages could be implemented:
+
+* Stage 1 can be implemented with a `blacklist` condition with value `.*`.
+* Stages 2 and 3 can be implemented with `whitelist` conditions.
+* Stages 4 and 5 can be implemented with `probability` conditions.
+
+For more general information about feature flags, please visit [featureflags.io](featureflags.io).
+## Conditions
+
+There are two types of conditions: *deterministic* (whitelist and blacklist,
+regex-based) and *probabilistic* (probability, expressed as a number between
+0 and 1). Conditions can be repeated if multiple instances are required.
+
+All conditions in each stage must be satisfied, in the order they are listed
+in the configuration file, for the feature to be considered enabled.
+
+If any condition is not met, evaluation of conditions stops and the feature
+is considered disabled.
+
+### Whitelist
+
+The `whitelist` condition allows to specify a list of regular expressions; if the
+predicate matches any of the expressions, then the condition is met and the evaluation
+moves to the next condition, if there is any.
+
+The regular expression is not anchored. This means that a regex of `"storage"` will
+match both the predicate `"storage"` and the predicate `"storage1"`. To prevent
+unintended matches, it's recommended to always anchor the regex.
+
+So, for example, `"^storage$"` will only match `"storage"` and not `"storage1"`.
+
+### Blacklist
+
+The `blacklist` condition is analogous to the whitelist condition, except that if
+the predicate matches any of the expressions the condition is considered not met
+and the evaluation stops.
+
+### Probability
+
+The `probability` condition allows the user to specify a percentage of invocations
+that will lead to the condition to be met, expressed as a floating point number
+between 0 and 1.
+
+So, if the user specifies a value of `0.3`, roughly 30% of times the condition is
+checked it will be considered met, while for the remaining 70% of times
+it will be considered unmet.
+
+The position of the `probability` condition is very important. Let's look at
+the following example:
+
+```json
+{
+    "stages": {
+        "whitelist-first": [
+            {"whitelist": ["storage.*"]},
+            {"probability": 0.1}
+        ],
+        "probability-first": [
+            {"probability": 0.1}
+            {"whitelist": ["storage.*"]},
+        ]
+    }
+}
+```
+
+The first stage definition, `whitelist-first`, will evaluate the `probability` condition
+only if the predicate first passes the whitelist.
+
+The second stage definition, `probability-first`, will instead first evaluate
+the `probability` condition, and then apply the whitelist.
+
+Assuming there are predicates that do not match the whitelist, the second stage definition
+is more restrictive than the first one, leading to fewer positive evaluations of the
+feature flag.
+
+## Cmdlets
+
+This package provides five PowerShell cmdlets:
+
+* `Test-FeatureFlag`, which checks if a given feature is enabled by testing a predicate
+  against the given feature flag configuration;
+* `Confirm-FeatureFlagConfig`, which validates the given feature flag configuration by
+  first validating it against the feature flags JSON schema and then by applying some
+  further validation rules;
+* `Get-FeatureFlagConfigFromFile`, which parses and validates a feature flag configuration
+  from a given file.
+* `Get-EvaluatedFeatureFlags`, which can be used to determine the collection of feature flags,
+  from the feature flags config, that apply given the specified predicate.
+* `Out-EvaluatedFeaturesFiles`, which will write out feature flag files (.json, .ini, env.config)
+  which will indicate which features are enabled, and which environment variables should be set.
+
+## A more complex example
+
+**NOTE**: comments are added in-line in this example, but the JSON format does not allow
+for comments. Don't add comments to your feature flag configuration file.
+
+```json
+{
+  // Definition of roll-out stages.
+  "stages": {
+    // Examples of probabilistic stages.
+    "1percent": [
+      {"probability": 0.01},
+    ],
+    "10percent": [
+      {"probability": 0.1},
+    ],
+    "all": [
+      {"probability": 1},
+    ],
+    // Examples of deterministic stages.
+    "all-storage": [
+      {"whitelist": [".*Storage.*"]},
+    ],
+    "storage-except-important": [
+      {"whitelist": [".*Storage.*"]},
+      {"blacklist": [".*StorageImportant.*"]},
+    ],
+    // Example of mixed roll-out stage.
+    // This stage will match on predicates containing the word "Storage"
+    // but not the word "StorageImportant", and then will consider the feature
+    // enabled in 50% of the cases.
+    "50-percent-storage-except-StorageImportant": [
+      {"whitelist": [".*Storage.*"]},
+      {"blacklist": ["StorageImportant"]},
+      {"probability": 0.5},
+    ],
+  },
+  // Roll out status of different features:
+  "features": {
+    "msbuild-cache": {
+      "stages": ["all-storage"],
+      "environmentVariables": [
+        { "Use_MsBuildCache": "1" }
+      ]
+    },
+    "experimental-feature": {
+      "stages": ["1percent"]
+      // Environment Variables are optional
+    },
+    "well-tested-feature": {
+      "stages": ["all"],
+      "environmentVariables": [
+        { "Use_TestedFeature": "1" }
+      ]
+    },
+  }
+}
+```
+
+## Why JSON?
+
+The configuration file uses JSON, despite its shortcomings, for the following
+reasons:
+
+1. it's supported natively by PowerShell, therefore it makes this package free
+   from dependencies;
+2. it's familiar to most PowerShell developers.
+
+Alternate formats, such as Protocol Buffers, while being technically superior,
+have been excluded for the above reasons.
 
 # Contributing
 

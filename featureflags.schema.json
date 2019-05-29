@@ -1,0 +1,109 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://onebranch.visualstudio.com/Build/_git/Powershell-FeatureFlags?path=%2Ffeatureflags.schema.json",
+    "title": "Feature Flags Schema",
+    "description": "Describes a schema for the Powershell-FeatureFlags configuration file.",
+    "type": "object",
+    "properties": {
+        "stages": {
+            "type": "object",
+            "description": "Configuration for each roll-out stage.",
+            "patternProperties": {
+                "^\\S+$": {
+                    "$ref": "#/definitions/conditions"
+                }
+            },
+            "additionalProperties": false
+        },
+        "features": {
+            "type": "object",
+            "description": "Mapping of features to stages. Note that the JSON schema does not support validating values of this object (stages) to keys in the 'stages' section, so this validation is done by the library.",
+            "patternProperties": {
+                "^\\S+$": {
+                    "$ref": "#/definitions/feature"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": ["stages"],
+    "additionalProperties": false,
+    "definitions": {
+        "whitelist": {
+            "type": "object",
+            "properties": {
+                "whitelist": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["whitelist"],
+            "additionalProperties": false
+        },
+        "blacklist": {
+            "type": "object",
+            "properties": {
+                "blacklist": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["blacklist"],
+            "additionalProperties": false
+        },
+        "probability": {
+            "type": "object",
+            "properties": {
+                "probability": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                }
+            },
+            "required": ["probability"],
+            "additionalProperties": false
+        },
+        "conditions": {
+            "type": "array",
+            "items": {
+                "oneOf": [{
+                        "$ref": "#/definitions/whitelist"
+                    },
+                    {
+                        "$ref": "#/definitions/blacklist"
+                    },
+                    {
+                        "$ref": "#/definitions/probability"
+                    }
+                ]
+            },
+            "minItems": 1
+        },
+        "feature": {
+            "type": "object",
+            "properties": {
+                "stages": {
+                  "type": "array",
+                  "items": {
+                      "type": "string"
+                  }
+                },  
+                "description": {
+                    "type": "string",
+                    "description": "Description of the feature"
+                },
+                "environmentVariables": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    },
+                    "description": "Environment Variables to apply for the specified feature."
+                }
+            }
+        }
+    }
+}
