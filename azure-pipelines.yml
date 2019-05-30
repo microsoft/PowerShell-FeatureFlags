@@ -1,0 +1,11 @@
+# Doesn't do much quite yet.
+
+trigger:
+- master
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+steps:
+- script: .\restore.cmd
+  displayName: 'Restore dependencies'
