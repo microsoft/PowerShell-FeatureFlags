@@ -18,8 +18,9 @@ function Get-FeatureFlagConfigFromFile([string]$jsonConfigPath) {
 }
 
 # Import the JSON and JSON schema libraries, and load the JSON schema.
-$schemaLibPath = Resolve-Path -Path $PSScriptRoot\External\NJsonSchema\lib\net45\NJsonSchema.dll
-$jsonLibPath = Resolve-Path -Path $PSScriptRoot\External\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll
+# TODO: don't rely on versioned paths. Use dotnet build / pack properly.
+$schemaLibPath = Resolve-Path -Path $PSScriptRoot\External\NJsonSchema\9.13.19\lib\netstandard1.0\NJsonSchema.dll
+$jsonLibPath = Resolve-Path -Path $PSScriptRoot\External\Newtonsoft.Json\9.0.1\lib\netstandard1.0\Newtonsoft.Json.dll
 $script:schema = $null
 try {
     Add-Type -Path $jsonLibPath

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TODO: target .NET Standard 2.0 -->
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <AssemblyName>PowerShell_FeatureFlags</AssemblyName>
+    <!-- Make sure dependencies are always copied in the output folder. 
+         Should be disabled once we run tests after the build step. -->
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.json" Version="9.0.1" />
+    <PackageReference Include="NJsonSchema" Version="9.13.19" />
+  </ItemGroup>
+
+</Project>

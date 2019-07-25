@@ -1,9 +1,14 @@
+param (
+    [switch] $Clean
+)
 $outputDir = "External"
-nuget install packages.config -ExcludeVersion -NonInteractive -PackageSaveMode nuspec -OutputDirectory $outputDir
 
-if (-not $?) {
-    Write-Error "Could not install packages." -ErrorAction Stop
+if ($Clean) {
+    Remove-Item -Path $outputDir -Recurse -Force
+} else {
+    dotnet restore --packages $outputDir --force 
+
+    if (-not $?) {
+        Write-Error "Could not install packages." -ErrorAction Stop
+    }
 }
-
-# Clean up .nupkg files.
-Get-ChildItem -Recurse $outputDir | Where-Object {$_.Extension -ieq ".nupkg"} | Remove-Item
