@@ -241,8 +241,8 @@ Describe 'Confirm-FeatureFlagConfig' {
 
 Describe 'Get-FeatureFlagConfigFromFile' {
     It 'Succeeds to load valid configuration files from a file' {
-        Get-FeatureFlagConfigFromFile ".\test\multiple-stages.json" | Should -Not -Be $null
-        Get-FeatureFlagConfigFromFile ".\test\single-stage.json" | Should -Not -Be $null
+        Get-FeatureFlagConfigFromFile "$PSScriptRoot\test\multiple-stages.json" | Should -Not -Be $null
+        Get-FeatureFlagConfigFromFile "$PSScriptRoot\test\single-stage.json" | Should -Not -Be $null
     }
 }
 
