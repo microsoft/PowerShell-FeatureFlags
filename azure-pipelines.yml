@@ -19,8 +19,7 @@ steps:
     filePath: './restore.ps1'
     pwsh: true
 
-- task: Pester@8
+- task: PowerShell@2
   inputs:
-    scriptFolder: '$(System.DefaultWorkingDirectory)\*'
-    resultsFile: '$(System.DefaultWorkingDirectory)\Test-Pester.XML'
-    run32Bit: False
+    filePath: './run-tests.ps1'
+    pwsh: true
