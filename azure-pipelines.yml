@@ -7,5 +7,7 @@ pool:
   vmImage: 'vs2017-win2016'
 
 steps:
-- script: .\restore.cmd
+- script: .\restore.ps1
   displayName: 'Restore dependencies'
+
+
