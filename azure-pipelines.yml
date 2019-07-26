@@ -1,5 +1,3 @@
-# Doesn't do much quite yet.
-
 trigger:
 - master
 
@@ -10,4 +8,8 @@ steps:
 - script: .\restore.ps1
   displayName: 'Restore dependencies'
 
-
+- task: Pester@8
+  inputs:
+    scriptFolder: '$(System.DefaultWorkingDirectory)\*'
+    resultsFile: '$(System.DefaultWorkingDirectory)\Test-Pester.XML'
+    run32Bit: False
