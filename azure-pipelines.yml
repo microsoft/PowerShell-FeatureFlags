@@ -5,8 +5,9 @@ pool:
   vmImage: 'vs2017-win2016'
 
 steps:
-- script: .\restore.ps1
-  displayName: 'Restore dependencies'
+- task: PowerShell@2
+  inputs:
+    filePath: '.\restore.ps1'
 
 - task: Pester@8
   inputs:
