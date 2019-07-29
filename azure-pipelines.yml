@@ -19,13 +19,13 @@ jobs:
   - task: PowerShell@2
     displayName: Restore
     inputs:
-      filePath: './restore.ps1'
+      filePath: 'tools/restore.ps1'
       pwsh: true
     
   - task: PowerShell@2
     displayName: Test
     inputs:
-      filePath: './run-tests.ps1'
+      filePath: 'tools/run-tests.ps1'
       pwsh: true
 
 - job: WindowsPowershell
@@ -35,9 +35,9 @@ jobs:
   - task: PowerShell@2
     displayName: Restore
     inputs:
-      filePath: './restore.ps1'
+      filePath: 'tools/restore.ps1'
     
   - task: PowerShell@2
     displayName: Test
     inputs:
-      filePath: './run-tests.ps1'
+      filePath: 'tools/run-tests.ps1'
