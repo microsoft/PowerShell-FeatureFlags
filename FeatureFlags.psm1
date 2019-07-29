@@ -409,12 +409,3 @@ function Out-FeaturesEnvConfig
         }
     }
 }
-
-Export-ModuleMember `
-    -Function @(
-        'Get-FeatureFlagConfigFromFile',
-        'Confirm-FeatureFlagConfig',
-        'Test-FeatureFlag',
-        'Get-EvaluatedFeatureFlags',
-        'Out-EvaluatedFeaturesFiles'
-    )

@@ -6,7 +6,7 @@
 #>
 
 $ModuleName = "FeatureFlags"
-Import-Module $PSScriptRoot\..\${ModuleName}.psm1 -Force
+Import-Module $PSScriptRoot\..\${ModuleName}.psd1 -Force
 Import-Module $PSScriptRoot\test-functions.psm1
 
 Describe 'Confirm-FeatureFlagConfig' {
