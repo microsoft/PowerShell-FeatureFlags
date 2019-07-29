@@ -41,3 +41,9 @@ jobs:
     displayName: Test
     inputs:
       filePath: 'tools/run-tests.ps1'
+
+  - task: PowerShell@2
+    displayName: TestManifest
+    inputs:
+      targetType: inline
+      script: 'Test-ModuleManifest -Path ./FeatureFlags.psd1'
