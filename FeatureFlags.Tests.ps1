@@ -583,29 +583,23 @@ Describe 'Out-EvaluatedFeaturesFiles' -Tag Features {
 
         It 'Honors blacklist' {
             $features = Get-EvaluatedFeatureFlags -predicate "important" -config $config
-            $expectedFeaturesJsonContent = @"
-{
-    "filetracker":  false,
-    "newestfeature":  false,`
-    "testfeature":  false
-}
-"@
-            $expectedFeaturesIniContent = @(`
-"filetracker`tfalse",`
-"newestfeature`tfalse",`
-"testfeature`tfalse"`
-)
-
+            $expectedFeaturesIniContent = @("filetracker`tfalse", "newestfeature`tfalse", "testfeature`tfalse")
             $expectedFeaturesEnvConfigContent = @()
 
             Out-EvaluatedFeaturesFiles -Config $config -EvaluatedFeatures $features -OutputFolder 'outputfolder.mock'
 
+            # Validate JSON
             $global:featuresJsonContent | Should -Not -Be $null
             $global:featuresJsonContent.Count | Should -Be 1
-            $global:featuresJsonContent | Should -Be $expectedFeaturesJsonContent
-            $global:featuresIniContent | Should -Not -Be $null
-            $global:featuresIniContent.Count | Should -Be 3
-            $global:featuresIniContent | Should -Be $expectedFeaturesIniContent
+            $jsonContent = ConvertFrom-Json -InputObject $global:featuresJsonContent[0]
+            $jsonContent.filetracker | Should -Be $false
+            $jsonContent.newestfeature | Should -Be $false
+            $jsonContent.testfeature | Should -Be $false
+
+            # Validate INI
+            Test-StringArrays ($expectedFeaturesIniContent | Sort-Object) ($global:featuresIniContent | Sort-Object)
+
+            # Validate Env
             $global:featuresEnvConfigContent.Count | Should -Be 0
             $global:featuresEnvConfigContent | Should -Be $expectedFeaturesEnvConfigContent
         }
