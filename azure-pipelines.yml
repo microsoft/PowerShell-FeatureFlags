@@ -7,10 +7,10 @@ jobs:
     matrix:
       linux:
         imageName: 'ubuntu-16.04'
-      #mac:
-      #  imageName: 'macos-10.13'
-      #windows:
-      #  imageName: 'vs2017-win2016'
+      mac:
+        imageName: 'macos-10.13'
+      windows:
+        imageName: 'vs2017-win2016'
 
   pool:
     vmImage: $(imageName)
@@ -20,7 +20,6 @@ jobs:
     displayName: Restore
     inputs:
       filePath: './restore.ps1'
-      arguments: '-List'
       pwsh: true
     
   - task: PowerShell@2
@@ -29,16 +28,16 @@ jobs:
       filePath: './run-tests.ps1'
       pwsh: true
 
-#- job: WindowsPowershell
-#  pool:
-#    vmImage: 'vs2017-win2016'
-#  steps:
-#  - task: PowerShell@2
-#    displayName: Restore
-#    inputs:
-#      filePath: './restore.ps1'
-#    
-#  - task: PowerShell@2
-#    displayName: Test
-#    inputs:
-#      filePath: './run-tests.ps1'
+- job: WindowsPowershell
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: PowerShell@2
+    displayName: Restore
+    inputs:
+      filePath: './restore.ps1'
+    
+  - task: PowerShell@2
+    displayName: Test
+    inputs:
+      filePath: './run-tests.ps1'
