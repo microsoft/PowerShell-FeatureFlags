@@ -2,7 +2,7 @@
 
 # TODO: remove.
 # List dependencies before testing. Troubleshooting a build failure on Linux.
-Get-ChildItem -Recurse -Path "$PSScriptRoot/External" -Depth 1 | ForEach-Object {Write-Host $_.FullName}
+Get-ChildItem -Recurse -Path "$PSScriptRoot/External" | ForEach-Object {Write-Host $_.FullName}
 
 Install-Module Pester -Force -Scope CurrentUser
 $FailedTests = Invoke-Pester -EnableExit
