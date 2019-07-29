@@ -6,8 +6,8 @@
 #>
 
 $ModuleName = "FeatureFlags"
-Import-Module $PSScriptRoot\${ModuleName}.psm1 -Force
-Import-Module $PSScriptRoot\helpers\test-functions.psm1
+Import-Module $PSScriptRoot\..\${ModuleName}.psm1 -Force
+Import-Module $PSScriptRoot\test-functions.psm1
 
 Describe 'Confirm-FeatureFlagConfig' {
     Context 'Validation of invalid configuration' {
@@ -241,8 +241,8 @@ Describe 'Confirm-FeatureFlagConfig' {
 
 Describe 'Get-FeatureFlagConfigFromFile' {
     It 'Succeeds to load valid configuration files from a file' {
-        Get-FeatureFlagConfigFromFile "$PSScriptRoot\test\multiple-stages.json" | Should -Not -Be $null
-        Get-FeatureFlagConfigFromFile "$PSScriptRoot\test\single-stage.json" | Should -Not -Be $null
+        Get-FeatureFlagConfigFromFile "$PSScriptRoot\multiple-stages.json" | Should -Not -Be $null
+        Get-FeatureFlagConfigFromFile "$PSScriptRoot\single-stage.json" | Should -Not -Be $null
     }
 }
 
@@ -550,7 +550,7 @@ Describe 'Test-FeatureFlag' {
 
 Describe 'Get-EvaluatedFeatureFlags' -Tag Features {
     Context 'Verify evaluation of all feature flags' {
-        $serializedConfig = Get-Content -Raw (Join-Path $PSScriptRoot ".\test\multiple-stages-features.json")
+        $serializedConfig = Get-Content -Raw "$PSScriptRoot\multiple-stages-features.json"
         Confirm-FeatureFlagConfig $serializedConfig
         $config = ConvertFrom-Json $serializedConfig;
         Mock New-Item -ModuleName FeatureFlags {}
@@ -570,7 +570,7 @@ Describe 'Out-EvaluatedFeaturesFiles' -Tag Features {
         $global:featuresIniContent = New-Object 'System.Collections.ArrayList()'
         $global:featuresEnvConfigContent = New-Object 'System.Collections.ArrayList()'
 
-        $serializedConfig = Get-Content -Raw (Join-Path $PSScriptRoot ".\test\multiple-stages-features.json")
+        $serializedConfig = Get-Content -Raw "$PSScriptRoot\multiple-stages-features.json"
         Confirm-FeatureFlagConfig $serializedConfig
         $config = ConvertFrom-Json $serializedConfig
 
