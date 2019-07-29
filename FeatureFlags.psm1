@@ -20,18 +20,31 @@ function Get-FeatureFlagConfigFromFile([string]$jsonConfigPath) {
 # Import the JSON and JSON schema libraries, and load the JSON schema.
 # TODO: don't rely on versioned paths. Use dotnet build / pack properly.
 $schemaLibPath = Resolve-Path -Path $PSScriptRoot\External\NJsonSchema\9.13.19\lib\netstandard1.0\NJsonSchema.dll
+if (-not (Test-Path -Path $schemaLibPath -PathType Leaf)) {
+    Write-Error "Could not find the DLL for NJSonSchema: $schemaLibPath"
+}
+
 $jsonLibPath = Resolve-Path -Path $PSScriptRoot\External\Newtonsoft.Json\9.0.1\lib\netstandard1.0\Newtonsoft.Json.dll
-$script:schema = $null
+if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
+    Write-Error "Could not find the DLL for Newtonsoft.Json: $jsonLibPath"
+}
+
 try {
     Add-Type -Path $jsonLibPath
     Add-Type -Path $schemaLibPath
+} catch {
+    Write-Error "Error loading JSON libraries"
+    Write-Host $_.Exception.LoaderExceptions
+}
 
+$script:schema = $null
+try {
     $script:schemaPath = Get-Content $PSScriptRoot\featureflags.schema.json
     $script:schema = [NJsonSchema.JSonSchema4]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
     Write-Debug "Loaded JSON schema from featureflags.schema.json."
 } catch {
-    Write-Error "Error loading JSON libraries"
-    Write-Host $_.Exception.LoaderExceptions
+    Write-Error "Error loading JSON schema"
+    Write-Host $_.Exception.Message
 }
 
 <#
