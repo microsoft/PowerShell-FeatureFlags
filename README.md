@@ -29,7 +29,7 @@ For more general information about feature flags, please visit [featureflags.io]
 
 Imagine to have a feature flag configuration file called `features.json`:
 
-```json
+```js
 {
   "stages": {
     "test": [
@@ -200,7 +200,7 @@ This package provides five PowerShell cmdlets:
 **NOTE**: comments are added in-line in this example, but the JSON format does not allow
 for comments. Don't add comments to your feature flag configuration file.
 
-```json
+```js
 {
   // Definition of roll-out stages.
   "stages": {
