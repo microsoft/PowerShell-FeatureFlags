@@ -70,20 +70,19 @@ This step would fail if there is any I/O error (e.g., file doesn't exist), if th
 Let's now test a couple of predicates to verify that the configuration does what we expect:
 
 ```powershell
-
-PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test1"
+PS > Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test1"
 True 
-PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test2"
+PS > Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test2"
 True 
-PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "dev1" 
+PS > Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "dev1" 
 True                                                                                                                                
-PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "prod-canary1"
+PS > Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "prod-canary1"
 True 
-PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod-canary1"
+PS > Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod-canary1"
 False 
-PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "test1"
+PS > Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "test1"
 True 
-PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod1"
+PS > Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod1"
 False 
 ```
 
