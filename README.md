@@ -17,41 +17,75 @@ A roll-out *stage* is defined by a name and an array of *conditions* that the
 predicate must match **in the order they are presented** for the feature associated to
 the given stage to be enabled.
 
-A feature can be assigned an array of stages that it applies to.  In addition, it can also accept an environment variable array, and can optionally output an environment configuration file.
+Stage names and feature names must be non-empty and must consist of non-space characters.
+
+A feature can be assigned an array of stages that it applies to. In addition,
+it can also accept an environment variable array, and can optionally output
+an environment configuration file.
+
+For more general information about feature flags, please visit [featureflags.io](featureflags.io).
 
 ## Simple example
 
+Imagine to have a feature flag configuration file called `features.json`:
+
 ```json
 {
-    "stages": {
-        "test-repo-and-branch": [
-            {
-                "whitelist": [
-                    "storage1/.*",
-                    "storage2/dev-branch"
-                ]
-            }
-        ]
+  "stages": {
+    "test": [
+      {"whitelist": ["test.*", "dev.*"]}
+    ],
+    "canary": [
+      {"whitelist": ["prod-canary"]}
+    ],
+    "prod": [
+      {"whitelist": ["prod.*"]},
+      {"blacklist": ["prod-canary"]}
+    ]
+  },
+  "features": {
+    "experimental-feature": {
+      "stages": ["test"]
     },
-    "features": {
-        "experimental-feature": {
-          "stages": ["test-repo-and-branch"],
-          "environmentVariables": [
-            { "Use_ExperimentalFeature": "1" }
-          ]
-        }
+    "well-tested-feature": {
+      "stages": ["test", "canary", "prod"]
     }
+  }
 }
 ```
 
-In this above example, `Test-FeatureFlag` would return true for the feature
-`experimental-feature` if the given predicate is either `storage2/dev-branch` or
-if it matches the regex `storage1/.*`.
+This file defines 3 stages: `test`, `canary` and `prod`, and 2 features: `experimental-feature` and `well-tested-feature`.
 
-Stage names and feature names must be non-empty and must consist of non-space characters.
+The intent of the configuration is to enable `experimental-feature` in `test` only (all predicates starting with `test` or `dev`),
+and to enable `well-tested-feature` in all stages.
 
-The environment variable 'Use_ExperimentalFeature' will also be associated with the feature.  The module contains methods that can be used to output the enabled feature flags environment variables so they can be applied during execution.  *Note: this powershell only writes out the featureflags environment file, but does
-not attempt to set the environment variables.
+Let's first read the configuration:
+
+```powershell
+$cfg = Get-FeatureFlagConfigFromFile features.json
+```
+
+This step would fail if there is any I/O error (e.g., file doesn't exist), if the file is not valid JSON or if the file does not conform with the [feature flags schema](featureflags.schema.json).
+
+Let's now test a couple of predicates to verify that the configuration does what we expect:
+
+```powershell
+
+PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test1"
+True                                                                                                                                                                                        
+PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test2"
+True                                                                                                                                                                                        
+PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "dev1" 
+True                                                                                                                                                                                        
+PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "prod-canary1"
+True 
+PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod-canary1"
+False 
+PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "test1"
+True 
+PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod1"
+False 
+```
 
 ## Life of a feature flag
 
@@ -75,7 +109,6 @@ Here is how these example stages could be implemented:
 * Stages 2 and 3 can be implemented with `whitelist` conditions.
 * Stages 4 and 5 can be implemented with `probability` conditions.
 
-For more general information about feature flags, please visit [featureflags.io](featureflags.io).
 ## Conditions
 
 There are two types of conditions: *deterministic* (whitelist and blacklist,

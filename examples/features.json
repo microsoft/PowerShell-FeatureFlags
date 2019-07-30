@@ -1,0 +1,22 @@
+{
+  "stages": {
+    "test": [
+      {"whitelist": ["test.*", "dev.*"]}
+    ],
+    "canary": [
+      {"whitelist": ["prod-canary"]}
+    ],
+    "prod": [
+      {"whitelist": ["prod.*"]},
+      {"blacklist": ["prod-canary"]}
+    ]
+  },
+  "features": {
+    "experimental-feature": {
+      "stages": ["test"]
+    },
+    "well-tested-feature": {
+      "stages": ["test", "canary", "prod"]
+    }
+  }
+}
