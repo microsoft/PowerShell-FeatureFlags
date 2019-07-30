@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $baseDir = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
-$buildDir = Join-Path $baseDir -ChildPath "bld"
+$buildDir = Join-Path $baseDir -ChildPath "bld\psgallery\FeatureFlags"
 
 if (-not (Test-Path $baseDir/External/newtonsoft.json) -or -not (Test-Path $baseDir/External/njsonschema)) {
     Write-Error "Missing dependencies. Please run restore.ps1."
