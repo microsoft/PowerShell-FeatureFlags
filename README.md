@@ -72,11 +72,11 @@ Let's now test a couple of predicates to verify that the configuration does what
 ```powershell
 
 PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test1"
-True                                                                                                                                                                                        
+True 
 PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "test2"
-True                                                                                                                                                                                        
+True 
 PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "dev1" 
-True                                                                                                                                                                                        
+True                                                                                                                                
 PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "well-tested-feature" -predicate "prod-canary1"
 True 
 PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod-canary1"
@@ -86,6 +86,8 @@ True
 PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-FeatureFlag -config $cfg -Feature "experimental-feature" -predicate "prod1"
 False 
 ```
+
+For more complex examples, please look at test cases. More examples will be added in the future (Issue $6).
 
 ## Life of a feature flag
 
