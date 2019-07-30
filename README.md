@@ -87,7 +87,7 @@ PS C:\Users\anspadac\Documents\repos\github\PowerShell-FeatureFlags> Test-Featur
 False 
 ```
 
-For more complex examples, please look at test cases. More examples will be added in the future (Issue $6).
+For more complex examples, please look at test cases. More examples will be added in the future (Issue #6).
 
 ## Life of a feature flag
 
