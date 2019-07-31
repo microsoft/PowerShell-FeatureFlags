@@ -277,7 +277,7 @@ reasons:
    from dependencies;
 2. it's familiar to most PowerShell developers.
 
-Alternate formats, such as Protocol Buffers, while being technically superior,
+Other formats, such as Protocol Buffers, while being technically superior,
 have been excluded for the above reasons.
 
 # Contributing
