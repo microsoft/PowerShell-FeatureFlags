@@ -5,9 +5,9 @@
 
 # PowerShell Feature Flags
 
-This package contains a simple implementation of feature flags for PowerShell,
-which relies on a local configuration file to verify if a given feature should
-be enabled or not.
+This package contains a simple, low-dependencies implementation of feature
+flags for PowerShell, which relies on a local configuration file to verify if
+a given feature should be enabled or not.
 
 The configuration file contains two sections:
 - **stages**: a section where roll-out stages are defined;
@@ -279,6 +279,21 @@ reasons:
 
 Other formats, such as Protocol Buffers, while being technically superior,
 have been excluded for the above reasons.
+
+## Relationship to similar projects
+
+There are some projects that allow to use Feature Flags in PowerShell:
+
+* **[microsoft/featurebits](https://github.com/microsoft/featurebits)**: this package uses a SQL database
+  to store feature flags value. While the features provided by this project are similar, our
+  `FeatureFlags` package does not need any external dependency to run, as features are stored in
+  a local file.
+
+* **SaaS (Software-as-a-Service) solutions**: using an external service for feature flags has its pros
+  and cons. They typically are much easier to manage and offer rich interfaces to manage the flags;
+  however, the specific use case for which this library was born is to enable feature flags for
+  PowerShell code which might not be able to open network connections: this requires the library and
+  the feature flags definition to be co-located with the code (hermeticity).
 
 # Contributing
 
