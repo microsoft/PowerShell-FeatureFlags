@@ -8,11 +8,11 @@ if (-not (Test-Path $baseDir/External/newtonsoft.json) -or -not (Test-Path $base
 }
 
 if (Test-Path $buildDir) {
-    Write-Host "Cleaning up directory $buildDir"
+    Write-Host "Cleaning up directory $buildDir."
     Remove-Item $buildDir -Force -Recurse
 }
 
-Write-Host "Creating $buildDir and copying everything in there"
+Write-Host "Creating $buildDir and copying everything in there."
 $null = New-Item -Path $buildDir -ItemType Directory -Force
 $null = New-Item -Path $buildDir/External -ItemType Directory -Force
 
@@ -25,7 +25,7 @@ Copy-Item -Force $baseDir/External/njsonschema $buildDir/External -Recurse
 
 $nupkgFiles = Get-ChildItem $buildDir -Recurse | Where-Object {$_.Extension -ieq ".nupkg"}
 if ($nupkgFiles.Count -gt 0) {
-    Write-Host "Removing $($nupkgFiles.Count) nupkg files: $nupkgFiles"
+    Write-Host "Removing $($nupkgFiles.Count) nupkg files: $nupkgFiles."
     $nupkgFiles | ForEach-Object {Remove-Item $_.FullName}
 }
 

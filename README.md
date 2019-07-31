@@ -114,7 +114,7 @@ An example lifecycle of a feature flag might be the following:
 2. The feature is enabled for a particular customer;
 3. The feature is enabled for a small set of customers;
 4. The feature is gradually rolled out to increasingly large percentages of customers
-   (e.g., 5%, 10%, 20%, 50%)
+   (e.g., 5%, 10%, 30%, 50%)
 5. The feature is rolled out to all customers (100%)
 6. The test for the feature flag is removed from the code, and the feature flag
    configuration is removed as well.
