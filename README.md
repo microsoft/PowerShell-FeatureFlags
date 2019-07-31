@@ -25,6 +25,21 @@ an environment configuration file.
 
 For more general information about feature flags, please visit [featureflags.io](featureflags.io).
 
+## Installation
+
+This module is available from the PowerShell Gallery. Therefore, to install it for all users
+on the machine type the following from an administrator PowerShell prompt:
+
+```powershell
+PS > Install-Module FeatureFlags
+```
+
+To install as an unprivileged user, type the following from any PowerShell prompt:
+
+```powershell
+PS > Install-Module FeatureFlags -Scope CurrentUser
+```
+
 ## Simple example
 
 Imagine to have a feature flag configuration file called `features.json`:
