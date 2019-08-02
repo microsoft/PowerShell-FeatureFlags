@@ -2,7 +2,7 @@
 $parentDir = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
 $testDir = Join-Path $parentDir -ChildPath "test"
 
-$pester = Get-Module -ListAvailable | Where-Object {$_.Name -eq "Pester"}
+$pester = Get-Module -ListAvailable | Where-Object {$_.Name -eq "Pester" -and $_.Version -gt '4.0.0'}
 if ($pester.Count -eq 0) {
     Write-Host "Cannot find the Pester module. Installing it."
     Install-Module Pester -Force -Scope CurrentUser
