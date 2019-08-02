@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- TODO: target .NET Standard 2.0 -->
     <TargetFramework>netstandard1.0</TargetFramework>
     <AssemblyName>PowerShell_FeatureFlags</AssemblyName>
     <!-- Make sure dependencies are always copied in the output folder. 
