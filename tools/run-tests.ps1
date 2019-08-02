@@ -2,7 +2,11 @@
 $parentDir = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
 $testDir = Join-Path $parentDir -ChildPath "test"
 
-Install-Module Pester -Force -Scope CurrentUser
+$pester = Get-Module -ListAvailable | Where-Object {$_.Name -eq "Pester"}
+if ($pester.Count -eq 0) {
+    Write-Host "Cannot find the Pester module. Installing it."
+    Install-Module Pester -Force -Scope CurrentUser
+}
 $FailedTests = Invoke-Pester $testDir -EnableExit
 if ($FailedTests -gt 0) {
     Write-Error "Error: $FailedTests Pester tests failed."
