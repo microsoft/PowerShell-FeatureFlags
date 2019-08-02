@@ -7,7 +7,7 @@ if ($pester.Count -eq 0) {
     Write-Host "Cannot find the Pester module. Installing it."
     Install-Module Pester -Force -Scope CurrentUser
 }
-$FailedTests = Invoke-Pester $testDir -EnableExit
+$FailedTests = Invoke-Pester $testDir -EnableExit -OutputFile "test/results.xml" -OutputFormat "NUnitXML" -CodeCoverage "$parentDir/FeatureFlags.psm1"
 if ($FailedTests -gt 0) {
     Write-Error "Error: $FailedTests Pester tests failed."
     exit $FailedTests

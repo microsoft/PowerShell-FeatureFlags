@@ -34,6 +34,11 @@ jobs:
     inputs:
       filePath: 'tools/run-tests.ps1'
       pwsh: true
+  
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: "NUnit"
+      testResultsFiles: "test/results.xml"
 
 - job: WindowsPowershell
   pool:
@@ -48,6 +53,11 @@ jobs:
     displayName: Test
     inputs:
       filePath: 'tools/run-tests.ps1'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: "NUnit"
+      testResultsFiles: "test/results.xml"
 
   - task: PowerShell@2
     displayName: TestManifest
