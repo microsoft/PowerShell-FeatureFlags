@@ -18,13 +18,14 @@ function Get-FeatureFlagConfigFromFile([string]$jsonConfigPath) {
 }
 
 # Import the JSON and JSON schema libraries, and load the JSON schema.
-# TODO: don't rely on versioned paths. Use dotnet build / pack properly.
-$schemaLibPath = Join-Path -Path $PSScriptRoot -ChildPath "External/njsonschema/9.13.19/lib/netstandard1.0/NJsonSchema.dll"
+$libs = Get-ChildItem -Recurse -Path "$PSScriptRoot/External"
+$libs = $libs | Where-Object {$_.Extension -ieq ".dll" -and $_.FullName -ilike "*netstandard1.0*"} | ForEach-Object {$_.FullName}
+$schemaLibPath = $libs | Where-Object {$_ -ilike "*NJsonSchema.dll"}
 if (-not (Test-Path -Path $schemaLibPath -PathType Leaf)) {
     Write-Error "Could not find the DLL for NJSonSchema: $schemaLibPath"
 }
 
-$jsonLibPath = Join-Path -Path $PSScriptRoot -ChildPath "External/newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll"
+$jsonLibPath = $libs | Where-Object {$_ -ilike "*Newtonsoft.Json.dll"}
 if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
     Write-Error "Could not find the DLL for Newtonsoft.Json: $jsonLibPath"
 }
