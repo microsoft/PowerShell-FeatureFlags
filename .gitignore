@@ -331,3 +331,6 @@ ASALocalRun/
 
 # External deps
 External/
+
+# Test results
+test/results.xml
