@@ -24,18 +24,21 @@ $schemaLibPath = $libs | Where-Object {$_ -ilike "*NJsonSchema.dll"}
 if (-not (Test-Path -Path $schemaLibPath -PathType Leaf)) {
     Write-Error "Could not find the DLL for NJSonSchema: $schemaLibPath"
 }
+Write-Verbose "Found NJsonSchema assembly at $schemaLibPath"
 
 $jsonLibPath = $libs | Where-Object {$_ -ilike "*Newtonsoft.Json.dll"}
 if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
     Write-Error "Could not find the DLL for Newtonsoft.Json: $jsonLibPath"
 }
+Write-Verbose "Found JSON.Net assembly at $jsonLibPath"
 
 try {
-    Add-Type -Path $jsonLibPath
-    Add-Type -Path $schemaLibPath
+    $jsonType = Add-Type -Path $jsonLibPath -PassThru
+    $jsonSchemaType = Add-Type -Path $schemaLibPath -PassThru
+    Write-Verbose "JSON.Net type: $jsonType"
+    Write-Verbose "NjsonSchema type: $jsonSchemaType"
 } catch {
-    Write-Error "Error loading JSON libraries"
-    Write-Host $_.Exception.LoaderExceptions
+    Write-Error "Error loading JSON libraries ($jsonLibPath, $schemaLibPath): $($_.Exception.Message)"
 }
 
 $script:schema = $null
