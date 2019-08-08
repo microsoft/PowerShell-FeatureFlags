@@ -334,3 +334,6 @@ External/
 
 # Test results
 test/results.xml
+
+# Nuget executable
+nuget.exe
