@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package>
   <metadata>
-    <id>PowerShell-FeatureFlags</id>
+    <id>FeatureFlags.PowerShell</id>
     <version>1.0.0</version>
     <title>PowerShell Feature Flags</title>
     <authors>Andrea Spadaccini,Nick Hara</authors>
     <owners>Andrea Spadaccini</owners>
-    <licenseUrl>https://github.com/microsoft/PowerShell-FeatureFlags/blob/master/LICENSE</licenseUrl>
+    <license type="expression">MIT</license>
     <projectUrl>https://github.com/microsoft/PowerShell-FeatureFlags/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>PowerShell module containing a Feature Flags implementation based on a local config file.</description>
