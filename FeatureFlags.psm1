@@ -44,7 +44,7 @@ try {
 $script:schema = $null
 try {
     $script:schemaPath = Get-Content $PSScriptRoot\featureflags.schema.json
-    $script:schema = [NJsonSchema.JSonSchema4]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
+    $script:schema = [NJsonSchema.JSonSchema]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
     Write-Debug "Loaded JSON schema from featureflags.schema.json."
 } catch {
     Write-Error "Error loading JSON schema"
