@@ -49,14 +49,14 @@ Imagine to have a feature flag configuration file called `features.json`:
 {
   "stages": {
     "test": [
-      {"whitelist": ["test.*", "dev.*"]}
+      {"allowlist": ["test.*", "dev.*"]}
     ],
     "canary": [
-      {"whitelist": ["prod-canary"]}
+      {"allowlist": ["prod-canary"]}
     ],
     "prod": [
-      {"whitelist": ["prod.*"]},
-      {"blacklist": ["prod-canary"]}
+      {"allowlist": ["prod.*"]},
+      {"denylist": ["prod-canary"]}
     ]
   },
   "features": {
@@ -122,13 +122,13 @@ An example lifecycle of a feature flag might be the following:
 
 Here is how these example stages could be implemented:
 
-* Stage 1 can be implemented with a `blacklist` condition with value `.*`.
-* Stages 2 and 3 can be implemented with `whitelist` conditions.
+* Stage 1 can be implemented with a `denylist` condition with value `.*`.
+* Stages 2 and 3 can be implemented with `allowlist` conditions.
 * Stages 4 and 5 can be implemented with `probability` conditions.
 
 ## Conditions
 
-There are two types of conditions: *deterministic* (whitelist and blacklist,
+There are two types of conditions: *deterministic* (allowlist and denylist,
 regex-based) and *probabilistic* (probability, expressed as a number between
 0 and 1). Conditions can be repeated if multiple instances are required.
 
@@ -138,9 +138,9 @@ in the configuration file, for the feature to be considered enabled.
 If any condition is not met, evaluation of conditions stops and the feature
 is considered disabled.
 
-### Whitelist
+### Allow list
 
-The `whitelist` condition allows to specify a list of regular expressions; if the
+The `allowlist` condition allows to specify a list of regular expressions; if the
 predicate matches any of the expressions, then the condition is met and the evaluation
 moves to the next condition, if there is any.
 
@@ -150,9 +150,9 @@ unintended matches, it's recommended to always anchor the regex.
 
 So, for example, `"^storage$"` will only match `"storage"` and not `"storage1"`.
 
-### Blacklist
+### Deny list
 
-The `blacklist` condition is analogous to the whitelist condition, except that if
+The `denylist` condition is analogous to the allowlist condition, except that if
 the predicate matches any of the expressions the condition is considered not met
 and the evaluation stops.
 
@@ -172,25 +172,25 @@ the following example:
 ```json
 {
     "stages": {
-        "whitelist-first": [
-            {"whitelist": ["storage.*"]},
+        "allowlist-first": [
+            {"allowlist": ["storage.*"]},
             {"probability": 0.1}
         ],
         "probability-first": [
             {"probability": 0.1}
-            {"whitelist": ["storage.*"]},
+            {"allowlist": ["storage.*"]},
         ]
     }
 }
 ```
 
-The first stage definition, `whitelist-first`, will evaluate the `probability` condition
-only if the predicate first passes the whitelist.
+The first stage definition, `allowlist-first`, will evaluate the `probability` condition
+only if the predicate first passes the allowlist.
 
 The second stage definition, `probability-first`, will instead first evaluate
-the `probability` condition, and then apply the whitelist.
+the `probability` condition, and then apply the allowlist.
 
-Assuming there are predicates that do not match the whitelist, the second stage definition
+Assuming there are predicates that do not match the allowlist, the second stage definition
 is more restrictive than the first one, leading to fewer positive evaluations of the
 feature flag.
 
@@ -231,19 +231,19 @@ for comments. Don't add comments to your feature flag configuration file.
     ],
     // Examples of deterministic stages.
     "all-storage": [
-      {"whitelist": [".*Storage.*"]},
+      {"allowlist": [".*Storage.*"]},
     ],
     "storage-except-important": [
-      {"whitelist": [".*Storage.*"]},
-      {"blacklist": [".*StorageImportant.*"]},
+      {"allowlist": [".*Storage.*"]},
+      {"denylist": [".*StorageImportant.*"]},
     ],
     // Example of mixed roll-out stage.
     // This stage will match on predicates containing the word "Storage"
     // but not the word "StorageImportant", and then will consider the feature
     // enabled in 50% of the cases.
     "50-percent-storage-except-StorageImportant": [
-      {"whitelist": [".*Storage.*"]},
-      {"blacklist": ["StorageImportant"]},
+      {"allowlist": [".*Storage.*"]},
+      {"denylist": ["StorageImportant"]},
       {"probability": 0.5},
     ],
   },

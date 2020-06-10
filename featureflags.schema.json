@@ -29,30 +29,30 @@
     "required": ["stages"],
     "additionalProperties": false,
     "definitions": {
-        "whitelist": {
+        "allowlist": {
             "type": "object",
             "properties": {
-                "whitelist": {
+                "allowlist": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 }
             },
-            "required": ["whitelist"],
+            "required": ["allowlist"],
             "additionalProperties": false
         },
-        "blacklist": {
+        "denylist": {
             "type": "object",
             "properties": {
-                "blacklist": {
+                "denylist": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 }
             },
-            "required": ["blacklist"],
+            "required": ["denylist"],
             "additionalProperties": false
         },
         "probability": {
@@ -70,11 +70,12 @@
         "conditions": {
             "type": "array",
             "items": {
-                "oneOf": [{
-                        "$ref": "#/definitions/whitelist"
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/allowlist"
                     },
                     {
-                        "$ref": "#/definitions/blacklist"
+                        "$ref": "#/definitions/denylist"
                     },
                     {
                         "$ref": "#/definitions/probability"

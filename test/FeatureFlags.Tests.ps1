@@ -76,6 +76,19 @@ Describe 'Confirm-FeatureFlagConfig' {
             {
                 "stags": {
                     "storage": [
+                        {"allowlist": [".*storage.*"]}
+                    ]
+                }
+            }
+"@
+            Confirm-FeatureFlagConfig -EA 0 $cfg | Should -Be $false
+        }
+
+        It 'Fails if a deprecated condition is used (whitelist)' {
+            $cfg = @"
+            {
+                "stages": {
+                    "storage": [
                         {"whitelist": [".*storage.*"]}
                     ]
                 }
@@ -84,12 +97,12 @@ Describe 'Confirm-FeatureFlagConfig' {
             Confirm-FeatureFlagConfig -EA 0 $cfg | Should -Be $false
         }
 
-        It 'Fails if a condition name contains a typo (whtelist)' {
+        It 'Fails if a condition name contains a typo (allwlist)' {
             $cfg = @"
             {
                 "stages": {
                     "storage": [
-                        {"whtelist": [".*storage.*"]}
+                        {"allwlist": [".*storage.*"]}
                     ]
                 }
             }
@@ -102,7 +115,7 @@ Describe 'Confirm-FeatureFlagConfig' {
             {
                 "stages": {
                     "storage": [
-                        {"whitelist": [".*storage.*"]}
+                        {"allowlist": [".*storage.*"]}
                     ]
                 },
                 "featurs": {
@@ -118,7 +131,7 @@ Describe 'Confirm-FeatureFlagConfig' {
             {
                 "stages": {
                     "": [
-                        {"whitelist": [".*storage.*"]}
+                        {"allowlist": [".*storage.*"]}
                     ]
                 }
             }
@@ -131,7 +144,7 @@ Describe 'Confirm-FeatureFlagConfig' {
             {
                 "stages": {
                     "    ": [
-                        {"whitelist": [".*storage.*"]}
+                        {"allowlist": [".*storage.*"]}
                     ]
                 }
             }
@@ -141,12 +154,12 @@ Describe 'Confirm-FeatureFlagConfig' {
     }
 
     Context 'Successful validation of simple stages' {
-        It 'Succeeds with a simple stage with two whitelists' {
+        It 'Succeeds with a simple stage with two allowlists' {
             $cfg = @"
             {
                 "stages": {
                     "storage": [
-                        {"whitelist": [".*storage.*", ".*compute.*"]}
+                        {"allowlist": [".*storage.*", ".*compute.*"]}
                     ]
                 }
             }
@@ -154,13 +167,13 @@ Describe 'Confirm-FeatureFlagConfig' {
             Confirm-FeatureFlagConfig $cfg | Should -Be $true
         }
 
-        It 'Succeeds with a simple stage with a whitelist and a blacklist' {
+        It 'Succeeds with a simple stage with a allowlist and a denylist' {
             $cfg = @"
             {
                 "stages": {
                     "storage": [
-                        {"whitelist": [".*storage.*"]}, 
-                        {"blacklist": ["ImportantStorage"]}
+                        {"allowlist": [".*storage.*"]}, 
+                        {"denylist": ["ImportantStorage"]}
                     ]
                 }
             }
@@ -187,7 +200,7 @@ Describe 'Confirm-FeatureFlagConfig' {
             {
                 "stages": {
                     "storage": [
-                        {"whitelist": [".*storage.*"]}
+                        {"allowlist": [".*storage.*"]}
                     ]
                 },
                 "features": {
@@ -205,10 +218,10 @@ Describe 'Confirm-FeatureFlagConfig' {
             {
                 "stages": {
                     "all": [
-                        {"whitelist": [".*"]}
+                        {"allowlist": [".*"]}
                     ], 
                     "storage": [
-                        {"whitelist": [".*storage.*"]}
+                        {"allowlist": [".*storage.*"]}
                     ]
                 },
                 "features": {
@@ -231,7 +244,7 @@ Describe 'Confirm-FeatureFlagConfig' {
             {
                 "stages": {
                     "storage": [
-                        {"whitelist": [".*storage.*"]}
+                        {"allowlist": [".*storage.*"]}
                     ]
                 },
                 "features": {
@@ -255,13 +268,13 @@ Describe 'Get-FeatureFlagConfigFromFile' {
 }
 
 Describe 'Test-FeatureFlag' {
-    Context 'Whitelist condition' {
-        Context 'Simple whitelist configuration' {
+    Context 'allowlist condition' {
+        Context 'Simple allowlist configuration' {
             $serializedConfig = @"
             {
                 "stages": {
                     "all": [
-                        {"whitelist": [".*"]}
+                        {"allowlist": [".*"]}
                     ]
                 },
                 "features": {
@@ -283,12 +296,12 @@ Describe 'Test-FeatureFlag' {
             }
         }
 
-        Context 'Chained whitelist configuration' {
+        Context 'Chained allowlist configuration' {
             $serializedConfig = @"
             {
                 "stages": {
                     "test-repo-and-branch": [
-                        {"whitelist": [
+                        {"allowlist": [
                             "storage1/.*",
                             "storage2/dev-branch"
                         ]}
@@ -315,13 +328,13 @@ Describe 'Test-FeatureFlag' {
         }
     }
 
-    Context 'Blacklist condition' {
+    Context 'denylist condition' {
         Context 'Reject-all configuration' {
             $serializedConfig = @"
             {
                 "stages": {
                     "none": [
-                        {"blacklist": [".*"]}
+                        {"denylist": [".*"]}
                     ]
                 },
                 "features": {
@@ -346,7 +359,7 @@ Describe 'Test-FeatureFlag' {
             {
                 "stages": {
                     "all-except-important": [
-                        {"blacklist": ["^important$"]}
+                        {"denylist": ["^important$"]}
                     ]
                 },
                 "features": {
@@ -360,7 +373,7 @@ Describe 'Test-FeatureFlag' {
             Confirm-FeatureFlagConfig $serializedConfig
             $config = ConvertFrom-Json $serializedConfig
 
-            # Given that the regex is ^important$, only the exact string "important" will match the blacklist.
+            # Given that the regex is ^important$, only the exact string "important" will match the denylist.
             It 'Allows the flag if the predicate does not match exactly' {
                 Test-FeatureFlag "some-feature" "Storage/master" $config | Should -Be $true
                 Test-FeatureFlag "some-feature" "foo" $config | Should -Be $true
@@ -378,7 +391,7 @@ Describe 'Test-FeatureFlag' {
             {
                 "stages": {
                     "all-except-important": [
-                        {"blacklist": ["storage-important/master", "storage-important2/master"]}
+                        {"denylist": ["storage-important/master", "storage-important2/master"]}
                     ]
                 },
                 "features": {
@@ -391,7 +404,7 @@ Describe 'Test-FeatureFlag' {
             Confirm-FeatureFlagConfig $serializedConfig
             $config = ConvertFrom-Json $serializedConfig
 
-            It 'Allows predicates not matching the blacklist' {
+            It 'Allows predicates not matching the denylist' {
                 Test-FeatureFlag "some-feature" "storage1/master" $config | Should -Be $true
                 Test-FeatureFlag "some-feature" "storage2/master" $config | Should -Be $true
                 Test-FeatureFlag "some-feature" "storage-important/dev" $config | Should -Be $true
@@ -404,13 +417,13 @@ Describe 'Test-FeatureFlag' {
         }
     }
 
-    Context 'Mixed whitelist/blacklist configuration' {
+    Context 'Mixed allowlist/denylist configuration' {
         $serializedConfig = @"
         {
             "stages": {
                 "all-storage-important": [
-                    {"whitelist": ["storage.*"]},
-                    {"blacklist": ["storage-important/master", "storage-important2/master"]}
+                    {"allowlist": ["storage.*"]},
+                    {"denylist": ["storage-important/master", "storage-important2/master"]}
                 ]
             },
             "features": {
@@ -509,13 +522,13 @@ Describe 'Test-FeatureFlag' {
         }
     }
 
-    Context 'Complex whitelist + blacklist + probability configuration' {
+    Context 'Complex allowlist + denylist + probability configuration' {
         $serializedConfig = @"
         {
             "stages": {
                 "all-storage-important-50pc": [
-                    {"whitelist": ["storage.*"]},
-                    {"blacklist": ["storage-important/master", "storage-important2/master"]},
+                    {"allowlist": ["storage.*"]},
+                    {"denylist": ["storage-important/master", "storage-important2/master"]},
                     {"probability": 0.5}
                 ]
             },
@@ -589,7 +602,7 @@ Describe 'Out-EvaluatedFeaturesFiles' -Tag Features {
         Mock -ModuleName $ModuleName Add-Content { ${global:featuresIniContent}.Add($Value) } -ParameterFilter  { $Path.EndsWith("features.ini") }
         Mock -ModuleName $ModuleName Add-Content { ${global:featuresEnvConfigContent}.Add($Value) } -ParameterFilter { $Path.EndsWith("features.env.config") }
 
-        It 'Honors blacklist' {
+        It 'Honors denylist' {
             $features = Get-EvaluatedFeatureFlags -predicate "important" -config $config
             $expectedFeaturesIniContent = @("filetracker`tfalse", "newestfeature`tfalse", "testfeature`tfalse")
             $expectedFeaturesEnvConfigContent = @()
