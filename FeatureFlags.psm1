@@ -44,16 +44,31 @@ try {
 
 $script:schema = $null
 try {
-    Write-Verbose "Loading JSON schema..."
+    Write-Verbose "Reading JSON schema..."
     $script:schemaPath = Get-Content $PSScriptRoot\featureflags.schema.json
-    $script:schema = [NJsonSchema.JSonSchema]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
-    Write-Verbose "Loaded JSON schema from featureflags.schema.json."
-    Write-Verbose $script:schema
 } catch {
-    Write-Error "Error loading JSON schema"
-    Write-Host $_.Exception.Message
+    Write-Error "Error reading JSON schema: $($_.Exception.Message)"
     throw
 }
+
+try {
+    Write-Verbose "Loading JSON schema..."
+    $script:schema = [NJsonSchema.JSonSchema]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
+} catch {
+    $firstException = $_.Exception
+    # As a fallback, try reading using the JsonSchema4 object. The JSON schema library
+    # exposes that object to .NET Framework instead of JsonSchema for some reason.
+    try {
+        Write-Verbose "Loading JSON schema (fallback)..."
+        $script:schema = [NJsonSchema.JSonSchema4]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
+    } catch {
+        Write-Error "Error loading JSON schema: $($_.Exception.Message). First error: $($firstException.Message)."
+        Write-Host $_.Exception.Message
+        throw
+    }
+}
+Write-Verbose "Loaded JSON schema from featureflags.schema.json."
+Write-Verbose $script:schema
 
 <#
 .SYNOPSIS 
