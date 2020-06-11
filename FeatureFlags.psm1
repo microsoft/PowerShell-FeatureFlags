@@ -244,7 +244,7 @@ function Test-FeatureConditions
             $probability = $condition.probability
             $random = (Get-Random) % 100 / 100.0
             Write-Verbose "random: ${random}. Checking against ${probability}"
-            if($random -gt $condition.probability)
+            if($random -ge $condition.probability)
             {
                 Write-Verbose "Probability condition not met: ${random} > ${probability}"
                 return $false
