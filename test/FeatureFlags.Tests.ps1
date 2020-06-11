@@ -4,10 +4,18 @@
            https://github.com/pester/Pester/wiki/Installation-and-Update.
            After updating, run the Invoke-Pester cmdlet from the project directory.
 #>
-
 $ModuleName = "FeatureFlags"
-Import-Module $PSScriptRoot\..\${ModuleName}.psd1 -Force
+Get-Module $ModuleName | Remove-Module -Force
 Import-Module $PSScriptRoot\test-functions.psm1
+
+$VerbosePreference = "Continue"
+$Module = Import-Module $PSScriptRoot\..\${ModuleName}.psd1 -Force -PassThru
+if ($null -eq $Module) {
+    Write-Error "Could not import $ModuleName"
+    exit 1
+}
+Write-Host "Done."
+Write-Host $Module.ExportedCommands.Values.Name
 
 Describe 'Confirm-FeatureFlagConfig' {
     Context 'Validation of invalid configuration' {
