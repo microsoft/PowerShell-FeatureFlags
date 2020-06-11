@@ -8,6 +8,14 @@ trigger:
       - examples/*
       - .gitignore
 
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily CI build
+  always: true
+  branches:
+    include:
+    - master
+
 jobs:
 - job: PowerShellCore
   strategy:
