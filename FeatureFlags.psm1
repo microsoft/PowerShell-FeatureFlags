@@ -35,20 +35,24 @@ Write-Verbose "Found JSON.Net assembly at $jsonLibPath"
 try {
     $jsonType = Add-Type -Path $jsonLibPath -PassThru
     $jsonSchemaType = Add-Type -Path $schemaLibPath -PassThru
-    Write-Verbose "JSON.Net type: $jsonType"
-    Write-Verbose "NjsonSchema type: $jsonSchemaType"
+    #Write-Verbose "JSON.Net type: $jsonType"
+    #Write-Verbose "NjsonSchema type: $jsonSchemaType"
 } catch {
     Write-Error "Error loading JSON libraries ($jsonLibPath, $schemaLibPath): $($_.Exception.Message)"
+    throw
 }
 
 $script:schema = $null
 try {
+    Write-Verbose "Loading JSON schema..."
     $script:schemaPath = Get-Content $PSScriptRoot\featureflags.schema.json
     $script:schema = [NJsonSchema.JSonSchema]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
-    Write-Debug "Loaded JSON schema from featureflags.schema.json."
+    Write-Verbose "Loaded JSON schema from featureflags.schema.json."
+    Write-Verbose $script:schema
 } catch {
     Write-Error "Error loading JSON schema"
     Write-Host $_.Exception.Message
+    throw
 }
 
 <#
