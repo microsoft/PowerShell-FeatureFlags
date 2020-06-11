@@ -246,7 +246,7 @@ function Test-FeatureConditions
             Write-Verbose "random: ${random}. Checking against ${probability}"
             if($random -ge $condition.probability)
             {
-                Write-Verbose "Probability condition not met: ${random} > ${probability}"
+                Write-Verbose "Probability condition not met: ${random} ≥ ${probability}"
                 return $false
             }
         } else {
