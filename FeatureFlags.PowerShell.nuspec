@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/microsoft/PowerShell-FeatureFlags/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>PowerShell module containing a Feature Flags implementation based on a local config file.</description>
-    <releaseNotes>Renamed blacklist to denylist, whitelist to allowlist. Updated JsonSchema dependency. Incompatible with 1.0.x.</releaseNotes>
+    <releaseNotes>Renamed blacklist to denylist, whitelist to allowlist. Incompatible with 1.0.x.</releaseNotes>
     <copyright>Copyright 2020 Microsoft</copyright>
     <repository type="git" url="https://github.com/microsoft/PowerShell-FeatureFlags.git" branch="master" />
   </metadata>
