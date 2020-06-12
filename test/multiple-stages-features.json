@@ -2,28 +2,28 @@
     "stages": {
         "all-except-important": [
             {
-                "blacklist": [
+                "denylist": [
                     "^important$"
                 ]
             }
         ],
         "poc": [
             {
-                "whitelist": [
+                "allowlist": [
                     "demo/.*demofeature.*"
                 ]
             }
         ],
         "dev": [
             {
-                "whitelist": [
+                "allowlist": [
                     "Dev.*"
                 ]
             }
         ],
         "test": [
             {
-                "whitelist": [
+                "allowlist": [
                     "demo/.*test.*/.*Official.*",
                     "demo2/.*test2.*"
                 ]
@@ -31,7 +31,7 @@
         ],
         "prod": [
             {
-                "whitelist": [
+                "allowlist": [
                     "production/.*"
                 ]
             }

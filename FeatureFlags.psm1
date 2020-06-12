@@ -219,24 +219,24 @@ function Test-FeatureConditions
     )
     # Conditions are evaluated in the order they are presented in the configuration file.
     foreach ($condition in $conditions) {
-        # Each condition object can have only one of the whitelist, blacklist or probability
+        # Each condition object can have only one of the allowlist, denylist or probability
         # attributes set. This invariant is enforced by the JSON schema, which uses the "oneof"
-        # strategy to choose between whitelist, blacklist or probability and, for each of these
+        # strategy to choose between allowlist, denylist or probability and, for each of these
         # condition types, only allows the homonym attribute to be set.
-        if ($null -ne $condition.whitelist) {
-            Write-Verbose "Checking the whitelist condition"
-            # The predicate must match any of the regexes in the whitelist in order to
-            # consider the whitelist condition satisfied.
-            $matchesWhitelist = Test-RegexList $predicate @($condition.whitelist)
-            if (-not $matchesWhitelist) {
+        if ($null -ne $condition.allowlist) {
+            Write-Verbose "Checking the allowlist condition"
+            # The predicate must match any of the regexes in the allowlist in order to
+            # consider the allowlist condition satisfied.
+            $matchesallowlist = Test-RegexList $predicate @($condition.allowlist)
+            if (-not $matchesallowlist) {
                 return $false
             }
-        } elseif ($null -ne $condition.blacklist) {
-            Write-Verbose "Checking the blacklist condition"
-            # The predicate must not match all of the regexes in the blacklist in order to
-            # consider the blacklist condition satisfied.
-            $matchesBlacklist = Test-RegexList $predicate @($condition.blacklist)
-            if ($matchesBlacklist) {
+        } elseif ($null -ne $condition.denylist) {
+            Write-Verbose "Checking the denylist condition"
+            # The predicate must not match all of the regexes in the denylist in order to
+            # consider the denylist condition satisfied.
+            $matchesdenylist = Test-RegexList $predicate @($condition.denylist)
+            if ($matchesdenylist) {
                 return $false
             }
         } elseif ($null -ne $condition.probability) {
@@ -250,7 +250,7 @@ function Test-FeatureConditions
                 return $false
             }
         } else {
-            throw "${condition} is not a supported condition type (blacklist, whitelist or probability)."
+            throw "${condition} is not a supported condition type (denylist, allowlist or probability)."
         }
     }
     return $true

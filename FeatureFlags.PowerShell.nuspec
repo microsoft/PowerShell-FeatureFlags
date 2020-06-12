@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>FeatureFlags.PowerShell</id>
-    <version>1.0.1</version>
+    <version>2.0.0</version>
     <title>PowerShell Feature Flags</title>
     <authors>Andrea Spadaccini,Nick Hara</authors>
     <owners>Andrea Spadaccini</owners>
@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/microsoft/PowerShell-FeatureFlags/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>PowerShell module containing a Feature Flags implementation based on a local config file.</description>
-    <releaseNotes>Fixed bug with the "probability" condition (issue #18).</releaseNotes>
+    <releaseNotes>Renamed blacklist to denylist, whitelist to allowlist. Incompatible with 1.0.x.</releaseNotes>
     <copyright>Copyright 2020 Microsoft</copyright>
     <repository type="git" url="https://github.com/microsoft/PowerShell-FeatureFlags.git" branch="master" />
   </metadata>

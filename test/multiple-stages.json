@@ -1,14 +1,14 @@
 {
 	"stages": {
 		"all-storage": [
-			{"whitelist": [".*Storage.*"]}
+			{"allowlist": [".*Storage.*"]}
 		],
 		"specific-storage-repos": [
-			{"whitelist": ["Storage-repo1", "storage-repo2"]}
+			{"allowlist": ["Storage-repo1", "storage-repo2"]}
 		],
 		"all-storage-except-important": [
-			{"whitelist": [".*Storage.*"]},
-			{"blacklist": ["Storage-important"]}
+			{"allowlist": [".*Storage.*"]},
+			{"denylist": ["Storage-important"]}
 		]
 	}
 }

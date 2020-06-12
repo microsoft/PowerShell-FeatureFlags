@@ -1,14 +1,14 @@
 {
   "stages": {
     "test": [
-      {"whitelist": ["test.*", "dev.*"]}
+      {"allowlist": ["test.*", "dev.*"]}
     ],
     "canary": [
-      {"whitelist": ["prod-canary"]}
+      {"allowlist": ["prod-canary"]}
     ],
     "prod": [
-      {"whitelist": ["prod.*"]},
-      {"blacklist": ["prod-canary"]}
+      {"allowlist": ["prod.*"]},
+      {"denylist": ["prod-canary"]}
     ]
   },
   "features": {
