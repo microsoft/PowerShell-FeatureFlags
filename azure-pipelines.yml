@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - master
+      - main
   paths:
     exclude:
       - README.md
@@ -14,7 +14,7 @@ schedules:
   always: true
   branches:
     include:
-    - master
+    - main
 
 jobs:
 - job: PowerShellCore
