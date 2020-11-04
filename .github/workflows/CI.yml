@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  powershell-core:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore
+        run: tools/restore.ps1
+        shell: pwsh
+
+      - name: test
+        run: tools/run-tests.ps1
+        shell: pwsh
