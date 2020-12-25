@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  powershell-core:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore
+        run: tools/restore.ps1
+        shell: pwsh
+
+      - name: test
+        run: tools/run-tests.ps1
+        shell: pwsh 
+  
+  windows-powershell:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore
+        run: tools/restore.ps1
+        shell: powershell
+
+      - name: test
+        run: tools/run-tests.ps1
+        shell: powershell 
+
+      - name: Test manifest
+        run: Test-ModuleManifest -Path ./FeatureFlags.psd1
+        shell: powershell

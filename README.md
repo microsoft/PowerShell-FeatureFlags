@@ -1,4 +1,3 @@
-[![Build Status](https://dev.azure.com/PowerShell-FeatureFlags/PowerShell-FeatureFlags/_apis/build/status/microsoft.PowerShell-FeatureFlags?branchName=master)](https://dev.azure.com/PowerShell-FeatureFlags/PowerShell-FeatureFlags/_build/latest?definitionId=1&branchName=master)
 [![Nuget](https://img.shields.io/nuget/v/FeatureFlags.PowerShell)](https://www.nuget.org/packages/FeatureFlags.PowerShell/1.0.0)
 [![Platforms](https://img.shields.io/powershellgallery/p/FeatureFlags.svg)](https://www.powershellgallery.com/packages/FeatureFlags/)
 [![FeatureFlags](https://img.shields.io/powershellgallery/v/FeatureFlags.svg)](https://www.powershellgallery.com/packages/FeatureFlags/)

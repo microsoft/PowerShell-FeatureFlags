@@ -4,18 +4,20 @@
            https://github.com/pester/Pester/wiki/Installation-and-Update.
            After updating, run the Invoke-Pester cmdlet from the project directory.
 #>
-$ModuleName = "FeatureFlags"
-Get-Module $ModuleName | Remove-Module -Force
-Import-Module $PSScriptRoot\test-functions.psm1
+BeforeAll {
+    $ModuleName = "FeatureFlags"
+    Get-Module $ModuleName | Remove-Module -Force
+    Import-Module $PSScriptRoot\test-functions.psm1
 
-$VerbosePreference = "Continue"
-$Module = Import-Module $PSScriptRoot\..\${ModuleName}.psd1 -Force -PassThru
-if ($null -eq $Module) {
-    Write-Error "Could not import $ModuleName"
-    exit 1
+    $VerbosePreference = "Continue"
+    $Module = Import-Module $PSScriptRoot\..\${ModuleName}.psd1 -Force -PassThru
+    if ($null -eq $Module) {
+        Write-Error "Could not import $ModuleName"
+        exit 1
+    }
+    Write-Host "Done."
+    Write-Host $Module.ExportedCommands.Values.Name
 }
-Write-Host "Done."
-Write-Host $Module.ExportedCommands.Values.Name
 
 Describe 'Confirm-FeatureFlagConfig' {
     Context 'Validation of invalid configuration' {
@@ -270,22 +272,24 @@ Describe 'Get-FeatureFlagConfigFromFile' {
 Describe 'Test-FeatureFlag' {
     Context 'allowlist condition' {
         Context 'Simple allowlist configuration' {
-            $serializedConfig = @"
-            {
-                "stages": {
-                    "all": [
-                        {"allowlist": [".*"]}
-                    ]
-                },
-                "features": {
-                    "well-tested": {
-                        "stages": ["all"]
+            BeforeAll {
+                $serializedConfig = @"
+                {
+                    "stages": {
+                        "all": [
+                            {"allowlist": [".*"]}
+                        ]
+                    },
+                    "features": {
+                        "well-tested": {
+                            "stages": ["all"]
+                        }
                     }
                 }
-            }
 "@
-            Confirm-FeatureFlagConfig $serializedConfig
-            $config = ConvertFrom-Json $serializedConfig
+                Confirm-FeatureFlagConfig $serializedConfig
+                $config = ConvertFrom-Json $serializedConfig
+            }
 
             It 'Rejects non-existing features' {
                 Test-FeatureFlag "feature1" "Storage/master" $config | Should -Be $false
@@ -297,25 +301,27 @@ Describe 'Test-FeatureFlag' {
         }
 
         Context 'Chained allowlist configuration' {
-            $serializedConfig = @"
-            {
-                "stages": {
-                    "test-repo-and-branch": [
-                        {"allowlist": [
-                            "storage1/.*",
-                            "storage2/dev-branch"
-                        ]}
-                    ]
-                },
-                "features": {
-                    "experimental-feature": {
-                        "stages": ["test-repo-and-branch"]
+            BeforeAll {
+                $serializedConfig = @"
+                {
+                    "stages": {
+                        "test-repo-and-branch": [
+                            {"allowlist": [
+                                "storage1/.*",
+                                "storage2/dev-branch"
+                            ]}
+                        ]
+                    },
+                    "features": {
+                        "experimental-feature": {
+                            "stages": ["test-repo-and-branch"]
+                        }
                     }
                 }
-            }
 "@
-            Confirm-FeatureFlagConfig $serializedConfig
-            $config = ConvertFrom-Json $serializedConfig
+                Confirm-FeatureFlagConfig $serializedConfig
+                $config = ConvertFrom-Json $serializedConfig
+            }
 
             It 'Returns true if the regex matches' {
                 Test-FeatureFlag "experimental-feature" "storage1/master" $config | Should -Be $true
@@ -330,22 +336,24 @@ Describe 'Test-FeatureFlag' {
 
     Context 'denylist condition' {
         Context 'Reject-all configuration' {
-            $serializedConfig = @"
-            {
-                "stages": {
-                    "none": [
-                        {"denylist": [".*"]}
-                    ]
-                },
-                "features": {
-                    "disabled": {
-                        "stages": ["none"]
+            BeforeAll {
+                $serializedConfig = @"
+                {
+                    "stages": {
+                        "none": [
+                            {"denylist": [".*"]}
+                        ]
+                    },
+                    "features": {
+                        "disabled": {
+                            "stages": ["none"]
+                        }
                     }
                 }
-            }
 "@
-            Confirm-FeatureFlagConfig $serializedConfig
-            $config = ConvertFrom-Json $serializedConfig
+                Confirm-FeatureFlagConfig $serializedConfig
+                $config = ConvertFrom-Json $serializedConfig
+            }
 
             It 'Rejects everything' {
                 Test-FeatureFlag "disabled" "Storage/master" $config | Should -Be $false
@@ -355,23 +363,25 @@ Describe 'Test-FeatureFlag' {
         }
 
         Context 'Reject single-value configuration' {
-            $serializedConfig = @"
-            {
-                "stages": {
-                    "all-except-important": [
-                        {"denylist": ["^important$"]}
-                    ]
-                },
-                "features": {
-                    "some-feature":
-                    {
-                        "stages": ["all-except-important"]
+            BeforeAll {
+                $serializedConfig = @"
+                {
+                    "stages": {
+                        "all-except-important": [
+                            {"denylist": ["^important$"]}
+                        ]
+                    },
+                    "features": {
+                        "some-feature":
+                        {
+                            "stages": ["all-except-important"]
+                        }
                     }
                 }
-            }
 "@
-            Confirm-FeatureFlagConfig $serializedConfig
-            $config = ConvertFrom-Json $serializedConfig
+                Confirm-FeatureFlagConfig $serializedConfig
+                $config = ConvertFrom-Json $serializedConfig
+            }
 
             # Given that the regex is ^important$, only the exact string "important" will match the denylist.
             It 'Allows the flag if the predicate does not match exactly' {
@@ -387,22 +397,24 @@ Describe 'Test-FeatureFlag' {
         }
 
         Context 'Reject multiple-value configuration' {
-            $serializedConfig = @"
-            {
-                "stages": {
-                    "all-except-important": [
-                        {"denylist": ["storage-important/master", "storage-important2/master"]}
-                    ]
-                },
-                "features": {
-                    "some-feature": {
-                        "stages": ["all-except-important"]
+            BeforeAll {
+                $serializedConfig = @"
+                {
+                    "stages": {
+                        "all-except-important": [
+                            {"denylist": ["storage-important/master", "storage-important2/master"]}
+                        ]
+                    },
+                    "features": {
+                        "some-feature": {
+                            "stages": ["all-except-important"]
+                        }
                     }
                 }
-            }
 "@
-            Confirm-FeatureFlagConfig $serializedConfig
-            $config = ConvertFrom-Json $serializedConfig
+                Confirm-FeatureFlagConfig $serializedConfig
+                $config = ConvertFrom-Json $serializedConfig
+            }
 
             It 'Allows predicates not matching the denylist' {
                 Test-FeatureFlag "some-feature" "storage1/master" $config | Should -Be $true
@@ -418,23 +430,25 @@ Describe 'Test-FeatureFlag' {
     }
 
     Context 'Mixed allowlist/denylist configuration' {
-        $serializedConfig = @"
-        {
-            "stages": {
-                "all-storage-important": [
-                    {"allowlist": ["storage.*"]},
-                    {"denylist": ["storage-important/master", "storage-important2/master"]}
-                ]
-            },
-            "features": {
-                "some-feature": {
-                    "stages": ["all-storage-important"]
+        BeforeAll {
+            $serializedConfig = @"
+            {
+                "stages": {
+                    "all-storage-important": [
+                        {"allowlist": ["storage.*"]},
+                        {"denylist": ["storage-important/master", "storage-important2/master"]}
+                    ]
+                },
+                "features": {
+                    "some-feature": {
+                        "stages": ["all-storage-important"]
+                    }
                 }
             }
-        }
 "@
-        Confirm-FeatureFlagConfig $serializedConfig
-        $config = ConvertFrom-Json $serializedConfig
+            Confirm-FeatureFlagConfig $serializedConfig
+            $config = ConvertFrom-Json $serializedConfig
+        }
 
         It 'Rejects storage important / important2 master branches' {
             Test-FeatureFlag "some-feature" "storage-important/master" $config | Should -Be $false
@@ -454,34 +468,36 @@ Describe 'Test-FeatureFlag' {
     }
 
     Context 'Probability condition' {
-        $serializedConfig = @"
-        {
-            "stages": {
-                "all": [
-                    {"probability": 1}
-                ],
-                "none": [
-                    {"probability": 0}
-                ],
-                "10percent": [
-                    {"probability": 0.1}
-                ]
-            },
-            "features": {
-                "well-tested": {
-                    "stages": ["all"]
+        BeforeAll {
+            $serializedConfig = @"
+            {
+                "stages": {
+                    "all": [
+                        {"probability": 1}
+                    ],
+                    "none": [
+                        {"probability": 0}
+                    ],
+                    "10percent": [
+                        {"probability": 0.1}
+                    ]
                 },
-                "not-launched": {
-                    "stages": ["none"]
-                },
-                "10pc-feature": {
-                    "stages": ["10percent"]
+                "features": {
+                    "well-tested": {
+                        "stages": ["all"]
+                    },
+                    "not-launched": {
+                        "stages": ["none"]
+                    },
+                    "10pc-feature": {
+                        "stages": ["10percent"]
+                    }
                 }
             }
-        }
 "@
-        Confirm-FeatureFlagConfig $serializedConfig
-        $config = ConvertFrom-Json $serializedConfig
+            Confirm-FeatureFlagConfig $serializedConfig
+            $config = ConvertFrom-Json $serializedConfig
+        }
 
         It 'Always allows with probability 1' {
             Test-FeatureFlag "well-tested" "storage-important/master" $config | Should -Be $true
@@ -523,25 +539,27 @@ Describe 'Test-FeatureFlag' {
     }
 
     Context 'Complex allowlist + denylist + probability configuration' {
-        $serializedConfig = @"
-        {
-            "stages": {
-                "all-storage-important-50pc": [
-                    {"allowlist": ["storage.*"]},
-                    {"denylist": ["storage-important/master", "storage-important2/master"]},
-                    {"probability": 0.5}
-                ]
-            },
-            "features": {
-                "some-feature": {
-                    "stages": ["all-storage-important-50pc"]
+        BeforeAll {
+            $serializedConfig = @"
+            {
+                "stages": {
+                    "all-storage-important-50pc": [
+                        {"allowlist": ["storage.*"]},
+                        {"denylist": ["storage-important/master", "storage-important2/master"]},
+                        {"probability": 0.5}
+                    ]
+                },
+                "features": {
+                    "some-feature": {
+                        "stages": ["all-storage-important-50pc"]
+                    }
                 }
             }
-        }
 "@
 
-        Confirm-FeatureFlagConfig $serializedConfig
-        $config = ConvertFrom-Json $serializedConfig
+            Confirm-FeatureFlagConfig $serializedConfig
+            $config = ConvertFrom-Json $serializedConfig
+        }
 
         It 'Rejects storage important / important2 master branches' {
             Test-FeatureFlag "some-feature" "storage-important/master" $config | Should -Be $false
@@ -571,10 +589,12 @@ Describe 'Test-FeatureFlag' {
 
 Describe 'Get-EvaluatedFeatureFlags' -Tag Features {
     Context 'Verify evaluation of all feature flags' {
-        $serializedConfig = Get-Content -Raw "$PSScriptRoot\multiple-stages-features.json"
-        Confirm-FeatureFlagConfig $serializedConfig
-        $config = ConvertFrom-Json $serializedConfig;
-        Mock New-Item -ModuleName FeatureFlags {}
+        BeforeAll {
+            $serializedConfig = Get-Content -Raw "$PSScriptRoot\multiple-stages-features.json"
+            Confirm-FeatureFlagConfig $serializedConfig
+            $config = ConvertFrom-Json $serializedConfig;
+            Mock New-Item -ModuleName FeatureFlags {}
+        }
 
         It 'Returns expected feature flags' {
             $expected = @{ "filetracker"=$true; "newestfeature"=$true; "testfeature"=$false }
@@ -587,20 +607,22 @@ Describe 'Get-EvaluatedFeatureFlags' -Tag Features {
 
 Describe 'Out-EvaluatedFeaturesFiles' -Tag Features {
     Context 'Verify output file content' {
-        $global:featuresJsonContent = New-Object 'System.Collections.ArrayList()'
-        $global:featuresIniContent = New-Object 'System.Collections.ArrayList()'
-        $global:featuresEnvConfigContent = New-Object 'System.Collections.ArrayList()'
+        BeforeAll {
+            $global:featuresJsonContent = New-Object 'System.Collections.ArrayList()'
+            $global:featuresIniContent = New-Object 'System.Collections.ArrayList()'
+            $global:featuresEnvConfigContent = New-Object 'System.Collections.ArrayList()'
 
-        $serializedConfig = Get-Content -Raw "$PSScriptRoot\multiple-stages-features.json"
-        Confirm-FeatureFlagConfig $serializedConfig
-        $config = ConvertFrom-Json $serializedConfig
+            $serializedConfig = Get-Content -Raw "$PSScriptRoot\multiple-stages-features.json"
+            Confirm-FeatureFlagConfig $serializedConfig
+            $config = ConvertFrom-Json $serializedConfig
 
-        Mock -ModuleName FeatureFlags New-Item {}
-        Mock -ModuleName $ModuleName Test-Path { Write-Output $true }
-        Mock -ModuleName $ModuleName Remove-Item {}
-        Mock -ModuleName $ModuleName Out-File { ${global:featuresJsonContent}.Add($InputObject) } -ParameterFilter { $FilePath.EndsWith("features.json") }
-        Mock -ModuleName $ModuleName Add-Content { ${global:featuresIniContent}.Add($Value) } -ParameterFilter  { $Path.EndsWith("features.ini") }
-        Mock -ModuleName $ModuleName Add-Content { ${global:featuresEnvConfigContent}.Add($Value) } -ParameterFilter { $Path.EndsWith("features.env.config") }
+            Mock -ModuleName FeatureFlags New-Item {}
+            Mock -ModuleName $ModuleName Test-Path { Write-Output $true }
+            Mock -ModuleName $ModuleName Remove-Item {}
+            Mock -ModuleName $ModuleName Out-File { ${global:featuresJsonContent}.Add($InputObject) } -ParameterFilter { $FilePath.EndsWith("features.json") }
+            Mock -ModuleName $ModuleName Add-Content { ${global:featuresIniContent}.Add($Value) } -ParameterFilter  { $Path.EndsWith("features.ini") }
+            Mock -ModuleName $ModuleName Add-Content { ${global:featuresEnvConfigContent}.Add($Value) } -ParameterFilter { $Path.EndsWith("features.env.config") }
+        }
 
         It 'Honors denylist' {
             $features = Get-EvaluatedFeatureFlags -predicate "important" -config $config
@@ -627,5 +649,7 @@ Describe 'Out-EvaluatedFeaturesFiles' -Tag Features {
     }
 }
 
-Remove-Module $ModuleName
-Remove-Module test-functions
+AfterAll {
+    Remove-Module $ModuleName
+    Remove-Module test-functions
+}

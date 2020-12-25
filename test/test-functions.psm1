@@ -22,7 +22,7 @@ Function Test-StringArrays
 
     if ($null -eq $Actual)
     {
-        $Expected | Should Be $null
+        $Expected | Should -Be $null
         return
     }
 
@@ -38,11 +38,11 @@ Function Test-StringArrays
         Write-Host "Expected: $Expected" -ForegroundColor Red
     }
 
-    $Actual.Count | Should Be $Expected.Count
+    $Actual.Count | Should -Be $Expected.Count
 
     for ($i = 0; $i -lt $Actual.Count; $i++)
     {
-        $Actual[$i] | Should Be $Expected[$i]
+        $Actual[$i] | Should -Be $Expected[$i]
     }
 }
 
@@ -68,7 +68,7 @@ Function Test-ObjectArrays
 
     if ($Actual -eq $null)
     {
-        $Expected | Should Be $null
+        $Expected | Should -Be $null
         return
     }
 
@@ -84,7 +84,7 @@ Function Test-ObjectArrays
         Write-Host "Expected: $Expected" -ForegroundColor Red
     }
 
-    $Actual.Count | Should Be $Expected.Count
+    $Actual.Count | Should -Be $Expected.Count
 
     for ($i = 0; $i -lt $Actual.Count; $i++)
     {
@@ -114,13 +114,13 @@ Function Test-Hashtables
 
     if ($Expected -eq $null)
     {
-        $Actual | Should Be $null
+        $Actual | Should -Be $null
         return
     }
 
     if ($Actual -eq $null)
     {
-        $Expected | Should Be $null
+        $Expected | Should -Be $null
         return
     }
 
@@ -129,7 +129,7 @@ Function Test-Hashtables
         # Redundant, but tells Pester we tested something
         # If the counts don't match, continue with the comparison so we contain
         # find out what's missing in the test error log
-        $Actual.Count | Should Be $Expected.Count
+        $Actual.Count | Should -Be $Expected.Count
         return
     }
 
@@ -141,11 +141,11 @@ Function Test-Hashtables
 
             if ($null -eq $actualProperty.Value)
             {
-                $actualProperty.Value | Should Be $expectedValue
+                $actualProperty.Value | Should -Be $expectedValue
             }
             else
             {
-                $actualProperty.Value.GetType() | Should Be $expectedValue.GetType()
+                $actualProperty.Value.GetType() | Should -Be $expectedValue.GetType()
 
                 if ($expectedValue.GetType().FullName -eq 'System.Collections.Hashtable')
                 {
@@ -164,12 +164,12 @@ Function Test-Hashtables
                     else
                     {
                         # Just assert their lengths for now
-                        $actualProperty.Value.Count | Should Be $expectedValue.Count    
+                        $actualProperty.Value.Count | Should -Be $expectedValue.Count    
                     }
                 }
                 else
                 {
-                    $actualProperty.Value | Should Be $expectedValue
+                    $actualProperty.Value | Should -Be $expectedValue
                 }   
             }
         }
@@ -187,11 +187,11 @@ Function Test-Hashtables
 
             if ($null -eq $expectedProperty.Value)
             {
-                $actualValue | Should Be $expectedProperty.Value
+                $actualValue | Should -Be $expectedProperty.Value
             }
             else
             {
-                $actualValue.GetType() | Should Be $expectedProperty.Value.GetType()
+                $actualValue.GetType() | Should -Be $expectedProperty.Value.GetType()
 
                 if ($expectedProperty.Value.GetType().FullName -eq 'System.Collections.Hashtable')
                 {
@@ -210,12 +210,12 @@ Function Test-Hashtables
                     else
                     {
                         # Just assert their lengths for now
-                        $actualValue.Count | Should Be $expectedProperty.Value.Count    
+                        $actualValue.Count | Should -Be $expectedProperty.Value.Count    
                     }
                 }
                 else
                 {
-                    $actualValue | Should Be $expectedProperty.Value
+                    $actualValue | Should -Be $expectedProperty.Value
                 }
             }
         }
