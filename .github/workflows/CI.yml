@@ -35,3 +35,16 @@ jobs:
         run: tools/run-tests.ps1 -CleanPesterAndInstallV4
         shell: pwsh 
 
+  powershell-core-macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore
+        run: tools/restore.ps1
+        shell: pwsh
+
+      - name: test
+        run: tools/run-tests.ps1 -CleanPesterAndInstallV4
+        shell: pwsh 
