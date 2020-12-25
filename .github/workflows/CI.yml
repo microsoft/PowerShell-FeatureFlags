@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   powershell-core:
@@ -37,3 +39,7 @@ jobs:
       - name: test
         run: tools/run-tests.ps1
         shell: powershell 
+
+      - name: Test manifest
+        run: Test-ModuleManifest -Path ./FeatureFlags.psd1
+        shell: powershell
