@@ -289,7 +289,7 @@ Describe 'Test-FeatureFlag' {
     "@
                 Confirm-FeatureFlagConfig $serializedConfig
                 $config = ConvertFrom-Json $serializedConfig
-            }
+}
 
             It 'Rejects non-existing features' {
                 Test-FeatureFlag "feature1" "Storage/master" $config | Should -Be $false
