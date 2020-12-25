@@ -23,3 +23,17 @@ jobs:
       - name: test
         run: tools/run-tests.ps1 -CleanPesterAndInstallV4
         shell: pwsh 
+  
+  windows-powershell:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore
+        run: tools/restore.ps1
+        shell: powershell
+
+      - name: test
+        run: tools/run-tests.ps1 -CleanPesterAndInstallV4
+        shell: powershell 
