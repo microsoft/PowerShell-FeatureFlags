@@ -18,5 +18,5 @@ jobs:
         shell: pwsh
 
       - name: test
-        run: tools/run-tests.ps1
+        run: tools/run-tests.ps1 -CleanPesterAndInstallV4
         shell: pwsh 
