@@ -19,4 +19,4 @@ jobs:
 
       - name: test
         run: tools/run-tests.ps1
-        shell: pwsh
+        shell: pwsh 
