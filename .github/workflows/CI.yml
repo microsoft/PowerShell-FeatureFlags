@@ -7,36 +7,11 @@ on:
     branches: [ main ]
 
 jobs:
-  powershell-core-linux:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Restore
-        run: tools/restore.ps1
-        shell: pwsh
-
-      - name: test
-        run: tools/run-tests.ps1 -CleanPesterAndInstallV4
-        shell: pwsh 
-
-  powershell-core-windows:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Restore
-        run: tools/restore.ps1
-        shell: pwsh
-
-      - name: test
-        run: tools/run-tests.ps1 -CleanPesterAndInstallV4
-        shell: pwsh 
-
-  powershell-core-macos:
-    runs-on: macos-latest
+  powershell-core:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
