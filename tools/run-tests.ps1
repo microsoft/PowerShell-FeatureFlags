@@ -21,8 +21,8 @@ if ($pesterVersions.Count -eq 0) {
 }
 
 if ($CleanPesterAndInstallV4) {
+   Remove-Module Pester -Force
    Uninstall-Module Pester -Force -AllVersions
-   Remove-Module Pester
    Install-Module Pester -Force -Scope CurrentUser -RequiredVersion 4.10.1
 }
 
