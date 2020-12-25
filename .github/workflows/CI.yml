@@ -21,7 +21,7 @@ jobs:
         shell: pwsh
 
       - name: test
-        run: tools/run-tests.ps1 -CleanPesterAndInstallV4
+        run: tools/run-tests.ps1
         shell: pwsh 
   
   windows-powershell:
@@ -35,5 +35,5 @@ jobs:
         shell: powershell
 
       - name: test
-        run: tools/run-tests.ps1 -CleanPesterAndInstallV4
+        run: tools/run-tests.ps1
         shell: powershell 

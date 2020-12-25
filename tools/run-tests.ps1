@@ -1,8 +1,8 @@
 # Mostly for use of CI/CD. Install Pester and run tests.
 param (
-  # Set to true to remove all Pester versions and install 5.1.0
-  # the way unit tests are written.
-  [switch] $CleanPesterAndInstallV5 = $false
+  # Set to true to install Pester 5.1.0, regardless of whether a Pester version
+  # is present in the environment.
+  [switch] $InstallPester = $false
 )
 
 $parentDir = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
@@ -17,12 +17,10 @@ $pesterVersions | % { Write-Host $_.Name $_.Version }
 
 if ($pesterVersions.Count -eq 0) {
    Write-Warning "No Pester found, will install Pester 5.1.0"
-   $CleanPesterAndInstallV5 = $true
+   $InstallPester = $true
 }
 
-if ($CleanPesterAndInstallV5) {
-   Remove-Module Pester -Force
-   Uninstall-Module Pester -Force -AllVersions
+if ($InstallPester) {
    Install-Module Pester -Force -Scope CurrentUser -RequiredVersion 5.1.0
 }
 
