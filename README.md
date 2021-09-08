@@ -23,7 +23,7 @@ A feature can be assigned an array of stages that it applies to. In addition,
 it can also accept an environment variable array, and can optionally output
 an environment configuration file.
 
-For more general information about feature flags, please visit [featureflags.io](featureflags.io).
+For more general information about feature flags, please visit [featureflags.io](https://featureflags.io).
 
 ## Installation
 
