@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.json" Version="13.0.1" />
     <PackageReference Include="NJsonSchema" Version="9.13.19" />
   </ItemGroup>
 
