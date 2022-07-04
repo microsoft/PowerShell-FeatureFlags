@@ -136,6 +136,9 @@ _TeamCity*
 *.coverage
 *.coveragexml
 
+# Pester coverage
+coverage.xml
+
 # NCrunch
 _NCrunch_*
 .*crunch*.local.xml
