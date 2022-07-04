@@ -20,7 +20,7 @@ if ($pesterVersions.Count -eq 0) {
 }
 
 if ($InstallPester) {
-   Install-Module Pester -Force -Scope CurrentUser -RequiredVersion $RequiredPesterVersion
+   Install-Module Pester -Force -Scope CurrentUser -RequiredVersion $RequiredPesterVersion -SkipPublisherCheck
 }
 
 Get-Module -Name Pester | Remove-Module
