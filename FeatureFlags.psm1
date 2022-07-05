@@ -32,6 +32,20 @@ if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
 }
 Write-Verbose "Found JSON.Net assembly at $jsonLibPath"
 
+Write-Verbose "Adding assembly resolver."
+$onAssemblyResolve = [System.ResolveEventHandler] {
+    param($sender, $e)
+
+    if ($e.Name -like 'Newtonsoft.Json, *') {
+        Write-Verbose "Resolving '$($e.Name)'"
+        return [System.Reflection.Assembly]::LoadFrom($jsonLibPath)
+    }
+
+    Write-Verbose "Unable to resolve assembly name '$($e.Name)'"
+    return $null
+}
+[System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolve)
+
 try {
     $jsonType = Add-Type -Path $jsonLibPath -PassThru
     $jsonSchemaType = Add-Type -Path $schemaLibPath -PassThru
@@ -41,6 +55,10 @@ try {
     Write-Error "Error loading JSON libraries ($jsonLibPath, $schemaLibPath): $($_.Exception.Message)"
     throw
 }
+
+# Unregister the assembly resolver.
+Write-Verbose "Removing assemlby resolver."
+[System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolve)
 
 $script:schema = $null
 try {
