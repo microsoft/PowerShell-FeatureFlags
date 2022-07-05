@@ -1,6 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://onebranch.visualstudio.com/Build/_git/Powershell-FeatureFlags?path=%2Ffeatureflags.schema.json",
+    "$id": "https://raw.githubusercontent.com/microsoft/PowerShell-FeatureFlags/main/featureflags.schema.json",
     "title": "Feature Flags Schema",
     "description": "Describes a schema for the Powershell-FeatureFlags configuration file.",
     "type": "object",
