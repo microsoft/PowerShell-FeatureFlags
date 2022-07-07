@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Test multiple PowerShell Core versions
 
 on:
   push:
@@ -7,15 +7,24 @@ on:
     - cron: 0 0 * * *
 
 jobs:
-  dockertest:
+  test:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        # This is necessary because there is no ubuntu version common to all the powershell docker images.
+        versions: 
+        - {pwsh: 7.1.5, ubuntu: 18.04}
+        - {pwsh: 7.0.0, ubuntu: 18.04}
+        - {pwsh: 6.1.3, ubuntu: 16.04}
+        - {pwsh: 6.1.0, ubuntu: 16.04}
+        - {pwsh: 6.0.4, ubuntu: 16.04}
+    
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: |
-        export VERSION=7.1.5
-        export UBUNTU_VERSION=18.04
+        export VERSION=${{ matrix.versions.pwsh }}
+        export UBUNTU_VERSION=${{ matrix.versions.ubuntu }}
         docker build . --file test/Dockerfile \
           --tag powershell-featureflags-test:$VERSION \
           --build-arg VERSION=$VERSION --build-arg UBUNTU_VERSION=$UBUNTU_VERSION
