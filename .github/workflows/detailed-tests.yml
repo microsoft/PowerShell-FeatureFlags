@@ -1,0 +1,22 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: 0 0 * * *
+
+jobs:
+  dockertest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: |
+        export VERSION=7.1.5
+        export UBUNTU_VERSION=18.04
+        docker build . --file test/Dockerfile \
+          --tag powershell-featureflags-test:$VERSION \
+          --build-arg VERSION=$VERSION --build-arg UBUNTU_VERSION=$UBUNTU_VERSION
+        docker run powershell-featureflags-test:$VERSION
