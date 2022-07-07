@@ -65,9 +65,6 @@ Describe 'Confirm-FeatureFlagConfig' {
 
             Confirm-FeatureFlagConfig -EA 0 '{"stages": {"foo": []}}' | Should -Be $false
             $error[0] | Should -BeLike "*Validation failed*"
-
-            Confirm-FeatureFlagConfig '{"stages": "}' -EA 0 | Should -Be $false
-            $error[0] | Should -BeLike "*Validation failed*"
         }
     }
 
