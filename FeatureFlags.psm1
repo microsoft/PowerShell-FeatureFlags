@@ -17,76 +17,86 @@ function Get-FeatureFlagConfigFromFile([string]$jsonConfigPath) {
     return ConvertFrom-Json $configJson
 }
 
-# Import the JSON and JSON schema libraries, and load the JSON schema.
-$libs = Get-ChildItem -Recurse -Path "$PSScriptRoot/External"
-$libs = $libs | Where-Object {$_.Extension -ieq ".dll" -and $_.FullName -ilike "*netstandard1.0*"} | ForEach-Object {$_.FullName}
-$schemaLibPath = $libs | Where-Object {$_ -ilike "*NJsonSchema.dll"}
-if (-not (Test-Path -Path $schemaLibPath -PathType Leaf)) {
-    Write-Error "Could not find the DLL for NJSonSchema: $schemaLibPath"
-}
-Write-Verbose "Found NJsonSchema assembly at $schemaLibPath"
+# This library uses Test-Json for JSON schema validation for PowerShell >= 6.1.
+# For previous versions, it uses NJsonSchema, # which depends on Newtonsoft.JSON.
+# Since PowerShell itself uses NJsonSchema and Newtonsoft.JSON, we load these
+# assemblies only when it is needed (older PowerShell versions).
+$version = $PSVersionTable.PSVersion
+Write-Verbose "Running under PowerShell $version"
+if ($version -lt [System.Version]"6.1.0") {
+    Write-Verbose "Loading JSON/JSON Schema libraries"
+    # Import the JSON and JSON schema libraries, and load the JSON schema.
+    $libs = Get-ChildItem -Recurse -Path "$PSScriptRoot/External"
+    $libs = $libs | Where-Object {$_.Extension -ieq ".dll" -and $_.FullName -ilike "*netstandard1.0*"} | ForEach-Object {$_.FullName}
+    $schemaLibPath = $libs | Where-Object {$_ -ilike "*NJsonSchema.dll"}
+    if (-not (Test-Path -Path $schemaLibPath -PathType Leaf)) {
+        Write-Error "Could not find the DLL for NJSonSchema: $schemaLibPath"
+    }
+    Write-Verbose "Found NJsonSchema assembly at $schemaLibPath"
 
-$jsonLibPath = $libs | Where-Object {$_ -ilike "*Newtonsoft.Json.dll"}
-if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
-    Write-Error "Could not find the DLL for Newtonsoft.Json: $jsonLibPath"
-}
-Write-Verbose "Found JSON.Net assembly at $jsonLibPath"
+    $jsonLibPath = $libs | Where-Object {$_ -ilike "*Newtonsoft.Json.dll"}
+    if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
+        Write-Error "Could not find the DLL for Newtonsoft.Json: $jsonLibPath"
+    }
+    Write-Verbose "Found JSON.Net assembly at $jsonLibPath"
 
-Write-Verbose "Adding assembly resolver."
-$onAssemblyResolve = [System.ResolveEventHandler] {
-    param($sender, $e)
+    Write-Verbose "Adding assembly resolver."
+    $onAssemblyResolve = [System.ResolveEventHandler] {
+        param($sender, $e)
 
-    if ($e.Name -like 'Newtonsoft.Json, *') {
-        Write-Verbose "Resolving '$($e.Name)'"
-        return [System.Reflection.Assembly]::LoadFrom($jsonLibPath)
+        if ($e.Name -like 'Newtonsoft.Json, *') {
+            Write-Verbose "Resolving '$($e.Name)'"
+            return [System.Reflection.Assembly]::LoadFrom($jsonLibPath)
+        }
+
+        Write-Verbose "Unable to resolve assembly name '$($e.Name)'"
+        return $null
+    }
+    [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolve)
+
+    try {
+        $jsonType = Add-Type -Path $jsonLibPath -PassThru
+        $jsonSchemaType = Add-Type -Path $schemaLibPath -PassThru
+        #Write-Verbose "JSON.Net type: $jsonType"
+        #Write-Verbose "NjsonSchema type: $jsonSchemaType"
+    } catch {
+        Write-Error "Error loading JSON libraries ($jsonLibPath, $schemaLibPath): $($_.Exception.Message)"
+        throw
     }
 
-    Write-Verbose "Unable to resolve assembly name '$($e.Name)'"
-    return $null
-}
-[System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolve)
-
-try {
-    $jsonType = Add-Type -Path $jsonLibPath -PassThru
-    $jsonSchemaType = Add-Type -Path $schemaLibPath -PassThru
-    #Write-Verbose "JSON.Net type: $jsonType"
-    #Write-Verbose "NjsonSchema type: $jsonSchemaType"
-} catch {
-    Write-Error "Error loading JSON libraries ($jsonLibPath, $schemaLibPath): $($_.Exception.Message)"
-    throw
+    # Unregister the assembly resolver.
+    Write-Verbose "Removing assemlby resolver."
+    [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolve)
 }
 
-# Unregister the assembly resolver.
-Write-Verbose "Removing assemlby resolver."
-[System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolve)
-
-$script:schema = $null
 try {
     Write-Verbose "Reading JSON schema..."
-    $script:schemaPath = Get-Content $PSScriptRoot\featureflags.schema.json
+    $script:schemaContents = Get-Content $PSScriptRoot\featureflags.schema.json -Raw
 } catch {
     Write-Error "Error reading JSON schema: $($_.Exception.Message)"
     throw
 }
 
-try {
-    Write-Verbose "Loading JSON schema..."
-    $script:schema = [NJsonSchema.JSonSchema]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
-} catch {
-    $firstException = $_.Exception
-    # As a fallback, try reading using the JsonSchema4 object. The JSON schema library
-    # exposes that object to .NET Framework instead of JsonSchema for some reason.
+if ($version -lt [System.Version]"6.1.0") {
     try {
-        Write-Verbose "Loading JSON schema (fallback)..."
-        $script:schema = [NJsonSchema.JSonSchema4]::FromJsonAsync($script:schemaPath).GetAwaiter().GetResult()
+        Write-Verbose "Loading JSON schema..."
+        $script:schema = [NJsonSchema.JSonSchema]::FromJsonAsync($script:schemaContents).GetAwaiter().GetResult()
     } catch {
-        Write-Error "Error loading JSON schema: $($_.Exception.Message). First error: $($firstException.Message)."
-        Write-Host $_.Exception.Message
-        throw
+        $firstException = $_.Exception
+        # As a fallback, try reading using the JsonSchema4 object. The JSON schema library
+        # exposes that object to .NET Framework instead of JsonSchema for some reason.
+        try {
+            Write-Verbose "Loading JSON schema (fallback)..."
+            $script:schema = [NJsonSchema.JSonSchema4]::FromJsonAsync($script:schemaContents).GetAwaiter().GetResult()
+        } catch {
+            Write-Error "Error loading JSON schema: $($_.Exception.Message). First error: $($firstException.Message)."
+            Write-Host $_.Exception.Message
+            throw
+        }
     }
+    Write-Verbose "Loaded JSON schema from featureflags.schema.json."
+    Write-Verbose $script:schema
 }
-Write-Verbose "Loaded JSON schema from featureflags.schema.json."
-Write-Verbose $script:schema
 
 <#
 .SYNOPSIS 
@@ -112,7 +122,7 @@ function Confirm-FeatureFlagConfig {
         [string] $serializedJson
     )
 
-    if ($null -eq $script:schema) {
+    if ($version -lt [System.Version]"6.1.0" -and $null -eq $script:schema) {
         Write-Error "Couldn't load the schema, considering the configuration as invalid."
         return $false
     }
@@ -121,7 +131,15 @@ function Confirm-FeatureFlagConfig {
         return $false
     }
     try {
-        $errors = $script:schema.Validate($serializedJson)
+
+        if ($version -lt [System.Version]"6.1.0") {
+            $errors = $script:schema.Validate($serializedJson)
+        } else {
+            $res = Test-Json -Json $serializedJson -Schema $script:schemaContents
+            if (-not $res) {
+                $errors = "Exception during validation"
+            }
+        }
         if ($null -eq $errors -or ($errors.Count -eq 0)) {
             if(-not (Confirm-StagesPointers $serializedJson)) {
                 return $false
