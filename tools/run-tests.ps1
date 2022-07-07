@@ -1,3 +1,6 @@
+# Fail on the first error.
+$ErrorActionPreference = "Stop"
+
 $parentDir = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
 $testDir = Join-Path $parentDir -ChildPath "test"
 

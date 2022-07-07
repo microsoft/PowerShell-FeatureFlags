@@ -2,7 +2,7 @@
 # Dockerfile to test the library with multiple versions of PowerShell >= 7.
 #
 # Example run (from repo root):
-# PS > $version="7.1.5"; docker build -f .\test\docker\Dockerfile . -t powershell-featureflags-test:$version --build-arg VERSION=$version --build-arg UBUNTU_VERSION=18.04 && docker run powershell-featureflags-test:$version
+# PS > $version="7.1.5"; docker build -f .\test\Dockerfile . -t powershell-featureflags-test:$version --build-arg VERSION=$version --build-arg UBUNTU_VERSION=18.04 && docker run powershell-featureflags-test:$version
 
 ARG VERSION=7.2.5
 ARG UBUNTU_VERSION=16.04
@@ -26,6 +26,9 @@ RUN ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 # Copy the application code.
 WORKDIR /app
 COPY . .
+# Restore dependencies.
+RUN pwsh tools/restore.ps1
 
-# Restore dependencies and run tests.
-CMD pwsh tools/restore.ps1; pwsh tools/run-tests.ps1
+# Run tests.
+CMD ["pwsh", "tools/run-tests.ps1"]
+
