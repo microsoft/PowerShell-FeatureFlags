@@ -23,7 +23,7 @@ function Get-FeatureFlagConfigFromFile([string]$jsonConfigPath) {
 # assemblies only when it is needed (older PowerShell versions).
 $version = $PSVersionTable.PSVersion
 Write-Verbose "Running under PowerShell $version"
-if ($version -le [System.Version]"6.1.0") {
+if ($version -lt [System.Version]"6.1.0") {
     Write-Verbose "Loading JSON/JSON Schema libraries"
     # Import the JSON and JSON schema libraries, and load the JSON schema.
     $libs = Get-ChildItem -Recurse -Path "$PSScriptRoot/External"
@@ -77,7 +77,7 @@ try {
     throw
 }
 
-if ($version -le [System.Version]"6.1.0") {
+if ($version -lt [System.Version]"6.1.0") {
     try {
         Write-Verbose "Loading JSON schema..."
         $script:schema = [NJsonSchema.JSonSchema]::FromJsonAsync($script:schemaContents).GetAwaiter().GetResult()
@@ -122,7 +122,7 @@ function Confirm-FeatureFlagConfig {
         [string] $serializedJson
     )
 
-    if ($version -le [System.Version]"6.1.0" -and $null -eq $script:schema) {
+    if ($version -lt [System.Version]"6.1.0" -and $null -eq $script:schema) {
         Write-Error "Couldn't load the schema, considering the configuration as invalid."
         return $false
     }
@@ -132,7 +132,7 @@ function Confirm-FeatureFlagConfig {
     }
     try {
 
-        if ($version -le [System.Version]"6.1.0") {
+        if ($version -lt [System.Version]"6.1.0") {
             $errors = $script:schema.Validate($serializedJson)
         } else {
             $res = Test-Json -Json $serializedJson -Schema $script:schemaContents
