@@ -1,3 +1,4 @@
+$ErrorActionPreference = "Stop"
 <#
 .SYNOPSIS 
 Loads the feature flags configuration from a JSON file.
@@ -18,28 +19,38 @@ function Get-FeatureFlagConfigFromFile([string]$jsonConfigPath) {
 }
 
 # This library uses Test-Json for JSON schema validation for PowerShell >= 6.1.
-# For previous versions, it uses NJsonSchema, # which depends on Newtonsoft.JSON.
+# For previous versions, it uses NJsonSchema, which depends on Newtonsoft.JSON.
 # Since PowerShell itself uses NJsonSchema and Newtonsoft.JSON, we load these
 # assemblies only when it is needed (older PowerShell versions).
 $version = $PSVersionTable.PSVersion
 Write-Verbose "Running under PowerShell $version"
 if ($version -lt [System.Version]"6.1.0") {
     Write-Verbose "Loading JSON/JSON Schema libraries"
-    # Import the JSON and JSON schema libraries, and load the JSON schema.
-    $libs = Get-ChildItem -Recurse -Path "$PSScriptRoot/External"
-    $libs = $libs | Where-Object {$_.Extension -ieq ".dll" -and $_.FullName -ilike "*netstandard1.0*"} | ForEach-Object {$_.FullName}
-    $schemaLibPath = $libs | Where-Object {$_ -ilike "*NJsonSchema.dll"}
-    if (-not (Test-Path -Path $schemaLibPath -PathType Leaf)) {
-        Write-Error "Could not find the DLL for NJSonSchema: $schemaLibPath"
-    }
-    Write-Verbose "Found NJsonSchema assembly at $schemaLibPath"
 
-    $jsonLibPath = $libs | Where-Object {$_ -ilike "*Newtonsoft.Json.dll"}
-    if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
-        Write-Error "Could not find the DLL for Newtonsoft.Json: $jsonLibPath"
-    }
-    Write-Verbose "Found JSON.Net assembly at $jsonLibPath"
+    # Get DLLs imported via restore.
+    $externalLibs = Get-ChildItem -Recurse -Path "$PSScriptRoot/External"
+    $externalLibs = $externalLibs | Where-Object {$_.Extension -ieq ".dll" -and $_.FullName -ilike "*netstandard1.0*"} | ForEach-Object {$_.FullName}
 
+    # If PowerShell ships with Newtonsoft.JSON, let's load that copy rather than the one in the NuGet package.
+    $jsonLibPath = [System.AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.FullName.StartsWith("Newtonsoft.Json")} | Select-Object -ExpandProperty Location
+    if ($null -eq $jsonLibPath) {
+        $jsonLibPath = $externalLibs | Where-Object {$_ -ilike "*Newtonsoft.Json.dll"}
+
+        if (-not (Test-Path -Path $jsonLibPath -PathType Leaf)) {
+            Write-Error "Could not find the DLL for Newtonsoft.Json: $jsonLibPath"
+        }   
+
+        try {
+            $jsonType = Add-Type -Path $jsonLibPath -PassThru
+            Write-Verbose "JSON.Net type: $jsonType"
+        } catch {
+            Write-Error "Error loading Newtonsoft.Json libraries ($jsonLibPath): $($_.Exception.Message)"
+            throw
+        }   
+    }
+    Write-Verbose "Using Newtonsoft.JSON from $jsonLibPath"
+
+    # Add an assembly redirect in case that NJsonSchema refers to a different version of Newtonsoft.Json.
     Write-Verbose "Adding assembly resolver."
     $onAssemblyResolve = [System.ResolveEventHandler] {
         param($sender, $e)
@@ -54,13 +65,18 @@ if ($version -lt [System.Version]"6.1.0") {
     }
     [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolve)
 
+    # Load the JSON Schema library.
+    $schemaLibPath = $externalLibs | Where-Object {$_ -ilike "*NJsonSchema.dll"}
+    if (-not (Test-Path -Path $schemaLibPath -PathType Leaf)) {
+        Write-Error "Could not find the DLL for NJSonSchema: $schemaLibPath"
+    }
+    Write-Verbose "Found NJsonSchema assembly at $schemaLibPath"
+
     try {
-        $jsonType = Add-Type -Path $jsonLibPath -PassThru
         $jsonSchemaType = Add-Type -Path $schemaLibPath -PassThru
-        #Write-Verbose "JSON.Net type: $jsonType"
-        #Write-Verbose "NjsonSchema type: $jsonSchemaType"
+        Write-Verbose "NjsonSchema type: $jsonSchemaType"
     } catch {
-        Write-Error "Error loading JSON libraries ($jsonLibPath, $schemaLibPath): $($_.Exception.Message)"
+        Write-Error "Error loading JSON schema library ($schemaLibPath): $($_.Exception.Message)"
         throw
     }
 
