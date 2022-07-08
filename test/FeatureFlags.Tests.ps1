@@ -1,23 +1,14 @@
-<#
-    .SYNOPSIS Tests for the FeatureFlags module.
-    .NOTES Please update to the last version of Pester before running the tests:
-           https://github.com/pester/Pester/wiki/Installation-and-Update.
-           After updating, run the Invoke-Pester cmdlet from the project directory.
-#>
-BeforeAll {
-    $ModuleName = "FeatureFlags"
-    Get-Module $ModuleName | Remove-Module -Force
-    Import-Module $PSScriptRoot\test-functions.psm1
+$ModuleName = "FeatureFlags"
+Get-Module $ModuleName | Remove-Module -Force
+Import-Module $PSScriptRoot\test-functions.psm1
 
-    $VerbosePreference = "Continue"
-    $Module = Import-Module $PSScriptRoot\..\${ModuleName}.psd1 -Force -PassThru
-    if ($null -eq $Module) {
-        Write-Error "Could not import $ModuleName"
-        exit 1
-    }
-    Write-Host "Done."
-    Write-Host $Module.ExportedCommands.Values.Name
+$VerbosePreference = "Continue"
+$Module = Import-Module $PSScriptRoot\..\${ModuleName}.psd1 -Force -PassThru
+if ($null -eq $Module) {
+    Write-Error "Could not import $ModuleName"
+    exit 1
 }
+Write-Host "Done."
 
 Describe 'Confirm-FeatureFlagConfig' {
     Context 'Validation of invalid configuration' {
@@ -645,7 +636,5 @@ Describe 'Out-EvaluatedFeaturesFiles' -Tag Features {
     }
 }
 
-AfterAll {
-    Remove-Module $ModuleName
-    Remove-Module test-functions
-}
+Remove-Module $ModuleName
+Remove-Module test-functions
