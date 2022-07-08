@@ -1,19 +1,15 @@
-# Mostly for use of CI/CD. Install Pester and run tests.
-param (
-  # Set to true to install Pester 5.1.0, regardless of whether a Pester version
-  # is present in the environment.
-  [switch] $InstallPester = $false
-)
+# Fail on the first error.
+$ErrorActionPreference = "Stop"
 
 $parentDir = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
 $testDir = Join-Path $parentDir -ChildPath "test"
 
 # Debug info.
-$PSVersionTable | Out-String
+Write-Host "PowerShell version" $PSVersionTable.PSVersion
+
 $RequiredPesterVersion = "5.3.3"
-
 $pesterVersions = Get-Module -ListAvailable | Where-Object {$_.Name -eq "Pester" -and $_.Version -eq $RequiredPesterVersion}
-
+$InstallPester = $false
 if ($pesterVersions.Count -eq 0) {
    Write-Warning "Pester $RequiredPesterVersion not found, installing it."
    $InstallPester = $true
