@@ -43,7 +43,7 @@ Describe 'Confirm-FeatureFlagConfig' {
         }
     }
 
-    Context 'Error output' {
+    Context 'Error output of Confirm-FeatureFlagConfig' {
         It 'Outputs correct error messages in case of failure' {
             # Write-Error will add errors to the $error variable and output them to standard error.
             # When run with -EA 0 (ErrorAction SilentlyContinue), the errors will be added to $error
@@ -56,6 +56,15 @@ Describe 'Confirm-FeatureFlagConfig' {
 
             Confirm-FeatureFlagConfig -EA 0 '{"stages": {"foo": []}}' | Should -Be $false
             $error[0] | Should -BeLike "*Validation failed*"
+        }
+    }
+
+    Context 'Error output of Get-FeatureFlagConfigFromFile' {
+        It 'Outputs correct error messages in case of failure' {
+            # Write-Error will add errors to the $error variable and output them to standard error.
+            # When run with -EA 0 (ErrorAction SilentlyContinue), the errors will be added to $error
+            # but not printed to stderr, which is desirable to not litter the unit tests output.
+            Get-FeatureFlagConfigFromFile -jsonConfigPath "this/file/does/not/exist" -EA 0 | Should -Be $null
         }
     }
 

@@ -10,7 +10,11 @@ Path to the JSON file containing the configuration.
 The output of ConvertFrom-Json (PSCustomObject) if the file contains a valid JSON object
 that matches the feature flags JSON schema, $null otherwise.
 #>
-function Get-FeatureFlagConfigFromFile([string]$jsonConfigPath) {
+function Get-FeatureFlagConfigFromFile {
+    [CmdletBinding()]
+    param(
+       [string]$jsonConfigPath
+    )
     $configJson = Get-Content $jsonConfigPath | Out-String
     if (-not (Confirm-FeatureFlagConfig $configJson)) {
         return $null
@@ -131,6 +135,7 @@ $false in case of such invalid configuration rather than throwing exceptions tha
 to be handled.
 #>
 function Confirm-FeatureFlagConfig {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
         [AllowNull()]
@@ -177,7 +182,8 @@ function Confirm-FeatureFlagConfig {
 # Unfortunately it's impossible to express this concept with the current
 # JSON schema standard.
 function Confirm-StagesPointers {
-    param(   
+    [CmdletBinding()]   
+    param(
         [string] $serializedJson
     )
 
@@ -264,6 +270,7 @@ function Test-FeatureFlag {
 
 function Test-FeatureConditions
 {
+    [CmdletBinding()]
     param(
         [PSCustomObject] $conditions,
         [string] $predicate,
@@ -320,6 +327,7 @@ Array of the supported features by name.
 #>
 function Get-SupportedFeatures
 {
+    [CmdletBinding()]
     param(
         [PSCustomObject] $config
     )
@@ -348,6 +356,7 @@ Returns the environment variables collection associated with a specific feature
 #>
 function Get-FeatureEnvironmentVariables
 {
+    [CmdletBinding()]
     param(
         [PSCustomObject] $Config,
         [string] $FeatureName
@@ -372,6 +381,7 @@ Returns an array of the evaluated feature flags given the specified predicate.
 #>
 function Get-EvaluatedFeatureFlags
 {
+    [CmdletBinding()]
     param(
         [string] $predicate,
         [PSCustomObject] $config
@@ -411,6 +421,7 @@ Outputs multiple file formats expressing the evaluated feature flags
 #>
 function Out-EvaluatedFeaturesFiles
 {
+    [CmdletBinding()]
     param(
         [PSCustomObject] $Config,
         [PSCustomObject] $EvaluatedFeatures,
