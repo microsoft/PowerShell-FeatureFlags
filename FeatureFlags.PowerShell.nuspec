@@ -2,16 +2,17 @@
 <package>
   <metadata>
     <id>FeatureFlags.PowerShell</id>
-    <version>2.0.0</version>
+    <version>2.1.1</version>
     <title>PowerShell Feature Flags</title>
     <authors>Andrea Spadaccini,Nick Hara</authors>
     <owners>Andrea Spadaccini</owners>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/microsoft/PowerShell-FeatureFlags/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <readme>README.md</readme>
     <description>PowerShell module containing a Feature Flags implementation based on a local config file.</description>
     <releaseNotes>Renamed blacklist to denylist, whitelist to allowlist. Incompatible with 1.0.x.</releaseNotes>
-    <copyright>Copyright 2020 Microsoft</copyright>
+    <copyright>Copyright 2022 Microsoft</copyright>
     <repository type="git" url="https://github.com/microsoft/PowerShell-FeatureFlags.git" branch="master" />
   </metadata>
   <files>

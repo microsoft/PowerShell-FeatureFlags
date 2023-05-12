@@ -1,4 +1,4 @@
-[![Nuget](https://img.shields.io/nuget/v/FeatureFlags.PowerShell)](https://www.nuget.org/packages/FeatureFlags.PowerShell/1.0.0)
+[![Nuget](https://img.shields.io/nuget/v/FeatureFlags.PowerShell)](https://www.nuget.org/packages/FeatureFlags.PowerShell)
 [![Platforms](https://img.shields.io/powershellgallery/p/FeatureFlags.svg)](https://www.powershellgallery.com/packages/FeatureFlags/)
 [![FeatureFlags](https://img.shields.io/powershellgallery/v/FeatureFlags.svg)](https://www.powershellgallery.com/packages/FeatureFlags/)
 
