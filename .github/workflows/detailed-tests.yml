@@ -13,6 +13,8 @@ jobs:
       matrix:
         # This is necessary because there is no ubuntu version common to all the powershell docker images.
         versions: 
+        - {pwsh: 7.4, ubuntu: 20.04}
+        - {pwsh: 7.3, ubuntu: 20.04}
         - {pwsh: 7.2, ubuntu: 20.04}
         - {pwsh: 7.1.5, ubuntu: 18.04}
         - {pwsh: 7.0.0, ubuntu: 18.04}
