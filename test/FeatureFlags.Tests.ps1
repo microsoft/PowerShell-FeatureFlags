@@ -604,9 +604,9 @@ Describe 'Get-EvaluatedFeatureFlags' -Tag Features {
 Describe 'Out-EvaluatedFeaturesFiles' -Tag Features {
     Context 'Verify output file content' {
         BeforeAll {
-            $global:featuresJsonContent = New-Object 'System.Collections.ArrayList()'
-            $global:featuresIniContent = New-Object 'System.Collections.ArrayList()'
-            $global:featuresEnvConfigContent = New-Object 'System.Collections.ArrayList()'
+            $global:featuresJsonContent = New-Object 'System.Collections.ArrayList'
+            $global:featuresIniContent = New-Object 'System.Collections.ArrayList'
+            $global:featuresEnvConfigContent = New-Object 'System.Collections.ArrayList'
 
             $serializedConfig = Get-Content -Raw "$PSScriptRoot\multiple-stages-features.json"
             Confirm-FeatureFlagConfig $serializedConfig
