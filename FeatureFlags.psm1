@@ -12,7 +12,7 @@ The JSON file should contain two main sections: "stages" for defining rollout st
 conditions, and "features" for associating features with stages and environment variables.
 
 .PARAMETER jsonConfigPath
-Path to the JSON file containing the configuration.
+Path to the JSON configuration file.
 
 .OUTPUTS
 The output of ConvertFrom-Json (PSCustomObject) if the file contains a valid JSON object
