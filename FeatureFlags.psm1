@@ -3,12 +3,35 @@ $ErrorActionPreference = "Stop"
 .SYNOPSIS 
 Loads the feature flags configuration from a JSON file.
 
+.DESCRIPTION
+This cmdlet reads a JSON file containing feature flag configuration and validates it against 
+the feature flags schema. If the configuration is valid, it returns a PowerShell object 
+representation of the JSON. If the file is invalid or doesn't exist, it returns $null.
+
+The JSON file should contain two main sections: "stages" for defining rollout stages with 
+conditions, and "features" for associating features with stages and environment variables.
+
 .PARAMETER jsonConfigPath
 Path to the JSON file containing the configuration.
 
 .OUTPUTS
 The output of ConvertFrom-Json (PSCustomObject) if the file contains a valid JSON object
 that matches the feature flags JSON schema, $null otherwise.
+
+.EXAMPLE
+$config = Get-FeatureFlagConfigFromFile -jsonConfigPath ".\features.json"
+if ($config) {
+    Write-Host "Configuration loaded successfully"
+} else {
+    Write-Host "Failed to load configuration"
+}
+
+.EXAMPLE
+# Load configuration and check available features
+$config = Get-FeatureFlagConfigFromFile "C:\config\feature-flags.json"
+if ($config -and $config.features) {
+    $config.features | Get-Member -MemberType NoteProperty | ForEach-Object { $_.Name }
+}
 #>
 function Get-FeatureFlagConfigFromFile {
     [CmdletBinding()]
@@ -122,12 +145,43 @@ if ($version -lt [System.Version]"6.1.0") {
 .SYNOPSIS 
 Validates feature flag configuration.
 
+.DESCRIPTION
+This cmdlet validates a feature flag configuration JSON string against the feature flags 
+schema. It performs both JSON schema validation and additional business logic validation,
+such as ensuring that all features reference defined stages.
+
+The validation includes checking that the JSON structure matches the expected schema for
+stages and features, and that all stage references in features actually exist in the
+stages section.
+
 .PARAMETER serializedJson
 String containing a JSON object.
 
 .OUTPUTS
 $true if the configuration is valid, false if it's not valid or if the config schema
 could not be loaded.
+
+.EXAMPLE
+$jsonConfig = Get-Content "features.json" -Raw
+if (Confirm-FeatureFlagConfig -serializedJson $jsonConfig) {
+    Write-Host "Configuration is valid"
+} else {
+    Write-Host "Configuration validation failed"
+}
+
+.EXAMPLE
+# Validate a simple configuration
+$simpleConfig = @"
+{
+  "stages": {
+    "test": [{"allowlist": ["test.*"]}]
+  },
+  "features": {
+    "new-feature": {"stages": ["test"]}
+  }
+}
+"@
+Confirm-FeatureFlagConfig -serializedJson $simpleConfig
 
 .NOTES
 The function accepts null/empty configuration because it's preferable to just return
@@ -228,6 +282,17 @@ function Test-RegexList {
 .SYNOPSIS 
 Tests if a given feature is enabled by testing a predicate against the given feature flag configuration.
 
+.DESCRIPTION
+This cmdlet evaluates whether a specific feature should be enabled for a given predicate by 
+checking the feature's associated stages and their conditions. The predicate is typically 
+an identifier (like a machine name, user ID, or environment name) that gets tested against 
+the stage conditions.
+
+Each feature can be associated with multiple stages, and the feature is considered enabled 
+if ANY of its stages evaluate to true. Stages contain conditions (allowlist, denylist, 
+probability) that are evaluated in order, and ALL conditions in a stage must be satisfied 
+for that stage to be considered active.
+
 .PARAMETER featureName
 The name of the feature to test.
 
@@ -240,6 +305,30 @@ A feature flag configuration, which should be parsed and checked by Get-FeatureF
 .OUTPUTS
 $true if the feature flag is enabled, $false if it's not enabled or if any other errors happened during
 the verification.
+
+.EXAMPLE
+$config = Get-FeatureFlagConfigFromFile -jsonConfigPath "features.json"
+$isEnabled = Test-FeatureFlag -featureName "new-ui" -predicate "prod-server1" -config $config
+if ($isEnabled) {
+    Write-Host "New UI feature is enabled for prod-server1"
+}
+
+.EXAMPLE
+# Test multiple predicates for a feature
+$config = Get-FeatureFlagConfigFromFile "features.json"
+$predicates = @("test-env", "dev-machine", "prod-canary")
+foreach ($predicate in $predicates) {
+    $result = Test-FeatureFlag -featureName "experimental-feature" -predicate $predicate -config $config
+    Write-Host "${predicate}: $result"
+}
+
+.EXAMPLE
+# Test feature enablement and set environment variables accordingly
+$config = Get-FeatureFlagConfigFromFile "features.json"
+if (Test-FeatureFlag -featureName "new-cache" -predicate $env:COMPUTERNAME -config $config) {
+    $env:USE_NEW_CACHE = "1"
+    Write-Host "New cache feature enabled"
+}
 #>
 function Test-FeatureFlag {
     [CmdletBinding()]
@@ -370,6 +459,15 @@ function Get-FeatureEnvironmentVariables
 .SYNOPSIS
 Determines the enabled features from the specified feature config using the provided predicate.
 
+.DESCRIPTION
+This cmdlet evaluates all features defined in the configuration against a given predicate 
+and returns a hashtable showing which features are enabled or disabled. This is useful 
+for getting a complete picture of feature enablement for a specific context (like a 
+particular server, user, or environment).
+
+The returned hashtable contains feature names as keys and boolean values indicating 
+whether each feature is enabled (True) or disabled (False) for the given predicate.
+
 .PARAMETER predicate
 The predicate to use to test if the feature is enabled.
 
@@ -377,7 +475,32 @@ The predicate to use to test if the feature is enabled.
 Feature flag configuration object
 
 .OUTPUTS
-Returns an array of the evaluated feature flags given the specified predicate.
+Returns a hashtable of the evaluated feature flags given the specified predicate.
+
+.EXAMPLE
+$config = Get-FeatureFlagConfigFromFile -jsonConfigPath "features.json"
+$results = Get-EvaluatedFeatureFlags -predicate "prod-server1" -config $config
+$results.GetEnumerator() | ForEach-Object {
+    Write-Host "Feature '$($_.Key)': $($_.Value)"
+}
+
+.EXAMPLE
+# Get enabled features for current machine
+$config = Get-FeatureFlagConfigFromFile "features.json"
+$enabledFeatures = Get-EvaluatedFeatureFlags -predicate $env:COMPUTERNAME -config $config
+$enabledFeatures.GetEnumerator() | Where-Object { $_.Value -eq $true } | ForEach-Object {
+    Write-Host "Enabled: $($_.Key)"
+}
+
+.EXAMPLE
+# Compare feature enablement across environments
+$config = Get-FeatureFlagConfigFromFile "features.json"
+$environments = @("test-env", "staging-env", "prod-env")
+foreach ($env in $environments) {
+    Write-Host "Environment: $env"
+    $features = Get-EvaluatedFeatureFlags -predicate $env -config $config
+    $features.GetEnumerator() | ForEach-Object { Write-Host "  $($_.Key): $($_.Value)" }
+}
 #>
 function Get-EvaluatedFeatureFlags
 {
@@ -404,6 +527,18 @@ function Get-EvaluatedFeatureFlags
 .SYNOPSIS
 Writes the evaluated features to a file in the specified output folder
 
+.DESCRIPTION
+This cmdlet takes a collection of evaluated feature flags and writes them to multiple file 
+formats in the specified output folder. It creates three types of files:
+
+1. JSON file (.json) - Contains the feature flags in JSON format
+2. INI file (.ini) - Contains the feature flags in INI/key-value format  
+3. Environment config file (.env.config) - Contains environment variables for enabled features
+
+The environment config file only includes features that are enabled and have associated 
+environment variables defined in the configuration. This is useful for setting up 
+environment-specific configurations in deployment scenarios.
+
 .PARAMETER Config
 Feature flag configuration object
 
@@ -418,6 +553,36 @@ The prefix filename to be used when writing out the features files
 
 .OUTPUTS
 Outputs multiple file formats expressing the evaluated feature flags
+
+.EXAMPLE
+$config = Get-FeatureFlagConfigFromFile -jsonConfigPath "features.json"
+$evaluated = Get-EvaluatedFeatureFlags -predicate "prod-server1" -config $config
+Out-EvaluatedFeaturesFiles -Config $config -EvaluatedFeatures $evaluated -OutputFolder "C:\output"
+
+# This creates:
+# C:\output\features.json
+# C:\output\features.ini  
+# C:\output\features.env.config
+
+.EXAMPLE
+# Generate feature files for multiple environments
+$config = Get-FeatureFlagConfigFromFile "features.json"
+$environments = @("dev", "staging", "prod")
+foreach ($env in $environments) {
+    $evaluated = Get-EvaluatedFeatureFlags -predicate $env -config $config
+    Out-EvaluatedFeaturesFiles -Config $config -EvaluatedFeatures $evaluated -OutputFolder ".\output\$env" -FileName "features-$env"
+}
+
+.EXAMPLE
+# Custom filename for output files
+$config = Get-FeatureFlagConfigFromFile "features.json"
+$evaluated = Get-EvaluatedFeatureFlags -predicate $env:COMPUTERNAME -config $config
+Out-EvaluatedFeaturesFiles -Config $config -EvaluatedFeatures $evaluated -OutputFolder ".\deployment" -FileName "machine-features"
+
+.NOTES
+The output directory will be created automatically if it doesn't exist. Environment 
+variables are only written to the .env.config file for features that are both enabled 
+and have environmentVariables defined in the configuration.
 #>
 function Out-EvaluatedFeaturesFiles
 {
